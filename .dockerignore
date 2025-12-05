@@ -1,0 +1,10 @@
+build
+schema
+Dockerfile
+Dockerfile.dev
+docker-compose.yaml
+Makefile
+swagger.yaml
+*.md
+.dockerignore
+.gitignore
