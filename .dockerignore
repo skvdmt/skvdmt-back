@@ -1,5 +1,4 @@
 build
-schema
 Dockerfile
 Dockerfile.dev
 docker-compose.yaml
