@@ -30,7 +30,7 @@ jobs:
       - name: Stop container
         run: docker stop skvdmt-back 
       - name: Remove container
-        run: docker rm skvdmt-back
+        run: docker rm -f skvdmt-back
       - name: Create container
         run: docker create \
           --network=skvdmt \
