@@ -36,8 +36,8 @@ jobs:
           docker create \
             --network=skvdmt \
             --name skvdmt-back \
-            -e MODE=dev \
             -e DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
+            --restart unless-stopped \
             skvdmt/skvdmt-back:latest
       - name: Make migration app folder on host if not exists
         run: mkdir -p /usr/src/migrations /usr/src/migrations/skvdmt-back
