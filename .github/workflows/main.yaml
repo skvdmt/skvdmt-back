@@ -34,7 +34,7 @@ jobs:
             --name skvdmt-back \
             -e DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD}} \
             skvdmt/skvdmt-back:latest
-          mkdir /usr/src/migrations /usr/src/migrations/skvdmt-back
+          mkdir -p /usr/src/migrations /usr/src/migrations/skvdmt-back
           docker cp skvdmt-back:/usr/src/skvdmt-back/schema/. /usr/src/migrations/skvdmt-back
           docker run -it --rm \
             --network=skvdmt \
