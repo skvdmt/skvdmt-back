@@ -32,6 +32,9 @@ jobs:
       - name: Remove container
         run: docker rm skvdmt-back || true
       - name: Create container
+        shell: bash
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         run: docker create \
           --network=skvdmt \
           --name skvdmt-back \
