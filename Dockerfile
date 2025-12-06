@@ -16,4 +16,4 @@ RUN mkdir -p /var/log/skvdmt-back
 RUN mkdir -p /etc/skvdmt-back
 COPY ./config/* /etc/skvdmt-back
 EXPOSE 8000
-CMD ["skvdmt-back"]
+ENTRYPOINT ["skvdmt-back"]
