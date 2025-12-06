@@ -27,8 +27,8 @@ jobs:
     steps:
       - name: Run application
         run: |
-          docker pull skvdmt/skvdmt-back:latest
           docker stop skvdmt-back
+          docker pull skvdmt/skvdmt-back:latest
           docker create --rm \
             --network=skvdmt \
             --name skvdmt-back \
