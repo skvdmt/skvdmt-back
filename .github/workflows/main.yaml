@@ -32,7 +32,7 @@ jobs:
       - name: Remove container
         run: docker rm skvdmt-back || true
       - name: Create container
-        run: docker create \
+        run: docker create --rm \
           --network=skvdmt \
           --name skvdmt-back \
           -e MODE=dev \
