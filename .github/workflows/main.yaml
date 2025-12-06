@@ -28,9 +28,9 @@ jobs:
       - name: Pull docker image
         run: docker pull skvdmt/skvdmt-back:latest
       - name: Stop container
-        run: docker stop skvdmt-back 
+        run: docker stop skvdmt-back || true
       - name: Remove container
-        run: docker rm -f skvdmt-back
+        run: docker rm skvdmt-back || true
       - name: Create container
         run: docker create \
           --network=skvdmt \
