@@ -45,13 +45,13 @@ jobs:
         run: docker cp skvdmt-back:/usr/src/skvdmt-back/schema/. /usr/src/migrations/skvdmt-back
       - name: Run migration
         run: |
-          docker run -it --rm \
+          docker run --rm \
             --network=skvdmt \
             --name migration \
             -v "/usr/src/migrations/skvdmt-back:/migrations" \
             migrate/migrate:latest \
               -path /migrations \
-              -database 'postgres://${{ vars.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD}}@db:5432/${{ vars.POSTGRES_DB }}?sslmode=disable' \
+              -database 'postgres://${{ vars.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@db:5432/${{ vars.POSTGRES_DB }}?sslmode=disable' \
               up
       - name: Container start
         run: docker start skvdmt-back
