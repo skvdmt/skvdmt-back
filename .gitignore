@@ -1,1 +1,5 @@
 build
+Dockerfile.dev
+docker-compose.yaml
+swagger.yaml
+Makefile
