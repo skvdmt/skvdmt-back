@@ -32,11 +32,11 @@ jobs:
       - name: Remove container
         run: docker rm skvdmt-back || true
       - name: Create container
-        run: docker create --rm \
+        run: docker create \
           --network=skvdmt \
           --name skvdmt-back \
           -e MODE=dev \
-          -e DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD}} \
+          -e DB_PASSWORD=$POSTGRES_PASSWORD \
           skvdmt/skvdmt-back:latest
       - name: Make migration app folder on host if not exists
         run: mkdir -p /usr/src/migrations /usr/src/migrations/skvdmt-back
