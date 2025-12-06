@@ -25,24 +25,31 @@ jobs:
     needs: [integration]
     runs-on: self-hosted
     steps:
-      - name: Run application
-        run: |
-          docker pull skvdmt/skvdmt-back:latest
-          docker stop skvdmt-back
-          docker rm skvdmt-back
-          docker create --rm \
-            --network=skvdmt \
-            --name skvdmt-back \
-            -e DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD}} \
-            skvdmt/skvdmt-back:latest
-          mkdir -p /usr/src/migrations /usr/src/migrations/skvdmt-back
-          docker cp skvdmt-back:/usr/src/skvdmt-back/schema/. /usr/src/migrations/skvdmt-back
-          docker run -it --rm \
-            --network=skvdmt \
-            --name migration \
-            -v "/usr/src/migrations/skvdmt-back:/migrations" \
-            migrate/migrate:latest \
-              -path /migrations \
-              -database 'postgres://${{ vars.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD}}@db:5432/${{ vars.POSTGRES_DB }}?sslmode=disable' \
-              up
-          docker start skvdmt-back
+      - name: Pull docker image
+        run: docker pull skvdmt/skvdmt-back:latest
+      - name: Stop container
+        run: docker stop skvdmt-back 
+      - name: Remove container
+        run: docker rm skvdmt-back
+      - name: Create container
+        run: docker create \
+          --network=skvdmt \
+          --name skvdmt-back \
+          -e MODE=dev
+          -e DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD}} \
+          skvdmt/skvdmt-back:latest
+      - name: Make migration app folder on host if not exists
+        run: mkdir -p /usr/src/migrations /usr/src/migrations/skvdmt-back
+      - name: Copy migration files from image to host
+        run: docker cp skvdmt-back:/usr/src/skvdmt-back/schema/. /usr/src/migrations/skvdmt-back
+      - name: Run migration
+        run: docker run -it --rm \
+          --network=skvdmt \
+          --name migration \
+          -v "/usr/src/migrations/skvdmt-back:/migrations" \
+          migrate/migrate:latest \
+            -path /migrations \
+            -database 'postgres://${{ vars.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD}}@db:5432/${{ vars.POSTGRES_DB }}?sslmode=disable' \
+            up
+      - name: Container start
+        run: docker start skvdmt-back
