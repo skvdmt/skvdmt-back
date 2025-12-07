@@ -58,7 +58,7 @@ var requests = []request{
 	// software
 	{
 		query: `INSERT INTO software(title, url) VALUES($1, $2);`,
-		args:  []any{"'Visual Studio Code", "https://code.visualstudio.com/"},
+		args:  []any{"Visual Studio Code", "https://code.visualstudio.com/"},
 	},
 	{
 		query: `INSERT INTO software(title, url) VALUES($1, $2);`,
