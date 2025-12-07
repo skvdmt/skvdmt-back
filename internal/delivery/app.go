@@ -37,9 +37,8 @@ func (a *App) Close() error {
 }
 
 const (
-	pkg             = "delivery"
-	app             = "app"
-	responseMarshal = "responseMarshal"
+	pkg = "delivery"
+	app = "app"
 
 	url_text         = "/text/{id}"
 	url_technologies = "/technologies"
@@ -65,21 +64,6 @@ func (a *App) Router() http.Handler {
 	return a.router
 }
 
-// responseMarshal marshal response struct to json
-func (a *App) responseMarshal(value any) ([]byte, error) {
-	r, err := json.Marshal(value)
-	if err != nil {
-		return nil, erw.New(erw.Internal(
-			erw.Location(pkg, responseMarshal),
-			erw.Error(fmt.Errorf(
-				"%v; %v cant marshal %v to json",
-				model.Errs[model.ErrConvertionResponse], err, value),
-			),
-		))
-	}
-	return r, nil
-}
-
 // Text handler homepage implementation
 func (a *App) Text(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("id")
@@ -87,12 +71,8 @@ func (a *App) Text(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.errorHandle(w, err)
 	}
-	v, err := a.responseMarshal(txt)
-	if err != nil {
-		a.errorHandle(w, err)
-	}
 	model.Logs.Info.Info(fmt.Sprintf("get text with name: %s; text: %s;", name, txt))
-	a.sendJSON(w, http.StatusOK, v)
+	a.sendJSON(w, http.StatusOK, txt)
 }
 
 // Technologies handler homepage implementation
@@ -101,12 +81,8 @@ func (a *App) Technologies(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.errorHandle(w, err)
 	}
-	v, err := a.responseMarshal(tls)
-	if err != nil {
-		a.errorHandle(w, err)
-	}
 	model.Logs.Info.Info("get technologies list")
-	a.sendJSON(w, http.StatusOK, v)
+	a.sendJSON(w, http.StatusOK, tls)
 }
 
 // Examples handler homepage implementation
@@ -115,12 +91,8 @@ func (a *App) Examples(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.errorHandle(w, err)
 	}
-	v, err := a.responseMarshal(els)
-	if err != nil {
-		a.errorHandle(w, err)
-	}
 	model.Logs.Info.Info("get examples list")
-	a.sendJSON(w, http.StatusOK, v)
+	a.sendJSON(w, http.StatusOK, els)
 }
 
 // Software handler homepage implementation
@@ -129,12 +101,8 @@ func (a *App) Software(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.errorHandle(w, err)
 	}
-	v, err := a.responseMarshal(sfw)
-	if err != nil {
-		a.errorHandle(w, err)
-	}
 	model.Logs.Info.Info("get software list")
-	a.sendJSON(w, http.StatusOK, v)
+	a.sendJSON(w, http.StatusOK, sfw)
 }
 
 // Libs handler homepage implementation
@@ -143,12 +111,8 @@ func (a *App) Libs(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.errorHandle(w, err)
 	}
-	v, err := a.responseMarshal(lbs)
-	if err != nil {
-		a.errorHandle(w, err)
-	}
 	model.Logs.Info.Info("get libs list")
-	a.sendJSON(w, http.StatusOK, v)
+	a.sendJSON(w, http.StatusOK, lbs)
 }
 
 // Links handler homepage implementation
@@ -157,19 +121,15 @@ func (a *App) Links(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.errorHandle(w, err)
 	}
-	v, err := a.responseMarshal(lks)
-	if err != nil {
-		a.errorHandle(w, err)
-	}
 	model.Logs.Info.Info("get footer links list")
-	a.sendJSON(w, http.StatusOK, v)
+	a.sendJSON(w, http.StatusOK, lks)
 }
 
 // sendJSON send json response
-func (a *App) sendJSON(w http.ResponseWriter, code int, value []byte) {
+func (a *App) sendJSON(w http.ResponseWriter, code int, value any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	w.Write(value)
+	json.NewEncoder(w).Encode(value)
 }
 
 // errorHandle sending and logging error
@@ -192,9 +152,5 @@ func (a *App) errorHandle(w http.ResponseWriter, err error) {
 	case 500 >= e.Code() && e.Code() <= 599:
 		model.Logs.Info.Info(fmt.Sprintf("%v", e.Detailed()))
 	}
-	v, err := a.responseMarshal(map[string]string{"message": e.Message()})
-	if err != nil {
-		a.errorHandle(w, err)
-	}
-	a.sendJSON(w, e.Code(), v)
+	a.sendJSON(w, e.Code(), map[string]string{"message": e.Message()})
 }

@@ -1,2 +1,2 @@
 port: 8000
-base_url: "/api/v1"
+base_url: ""
