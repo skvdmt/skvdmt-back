@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/skvdmt/skvdmt-back/internal/model"
 )
 
@@ -250,7 +250,7 @@ var sources = []request{
 const dublicate = "duplicate key value violates unique constraint"
 
 // InsertData insert default data to database tables
-func InsertData(db *pgx.Conn) {
+func InsertData(db *pgxpool.Pool) {
 	for _, req := range requests {
 		_, err := db.Exec(context.Background(), req.query, req.args...)
 		if err != nil {
@@ -295,7 +295,7 @@ func InsertData(db *pgx.Conn) {
 }
 
 // insertDataSetID remember returning id after inserting data
-func insertDataSetID(db *pgx.Conn, rs *[]request) {
+func insertDataSetID(db *pgxpool.Pool, rs *[]request) {
 	for i, req := range *rs {
 		if err := db.QueryRow(context.Background(), req.query,
 			req.args...).Scan(&(*rs)[i].id); err != nil {
@@ -309,7 +309,7 @@ func insertDataSetID(db *pgx.Conn, rs *[]request) {
 const defaultID = "00000000-0000-0000-0000-000000000000"
 
 // createLinks creating examples links to links, technologies and sources
-func createLinks(db *pgx.Conn, table, field string, exampleID, targetID int) {
+func createLinks(db *pgxpool.Pool, table, field string, exampleID, targetID int) {
 	var id uuid.UUID
 	switch table {
 	case "examples_links":

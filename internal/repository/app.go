@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/patrickmn/go-cache"
 	erw "github.com/skvdmt/errwrap"
 	"github.com/skvdmt/skvdmt-back/init/inserts"
@@ -31,7 +32,7 @@ const (
 // App
 type App struct {
 	cache *cache.Cache
-	db    *pgx.Conn
+	db    *pgxpool.Pool
 }
 
 const (
@@ -54,17 +55,17 @@ func NewApp() (*App, error) {
 		model.Config.Postgres.Port,
 		model.Config.Postgres.Database,
 	)
-	db, err := pgx.Connect(context.Background(), q)
+	dbpool, err := pgxpool.New(context.Background(), q)
 	if err != nil {
 		return nil, err
 	}
 
 	// insert default data to database tables
-	inserts.InsertData(db)
+	inserts.InsertData(dbpool)
 
 	return &App{
 		cache: cache.New(2*time.Minute, 20*time.Second),
-		db:    db,
+		db:    dbpool,
 	}, nil
 }
 
