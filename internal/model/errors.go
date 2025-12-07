@@ -15,6 +15,7 @@ const (
 	ErrDatabase
 	ErrConvertionError
 	ErrConvertionCache
+	ErrConvertionResponse
 )
 
 // LoadErrors
@@ -25,5 +26,6 @@ func LoadErrors() error {
 	Errs[ErrDatabase] = fmt.Errorf("error database")
 	Errs[ErrConvertionError] = fmt.Errorf("can't conversion error")
 	Errs[ErrConvertionCache] = fmt.Errorf("can't conversion cache")
+	Errs[ErrConvertionResponse] = fmt.Errorf("can't conversion response")
 	return nil
 }
