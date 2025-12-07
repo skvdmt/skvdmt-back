@@ -70,6 +70,7 @@ func (a *App) Text(w http.ResponseWriter, r *http.Request) {
 	txt, err := a.usecase.Text(r.Context(), name)
 	if err != nil {
 		a.errorHandle(w, err)
+		return
 	}
 	model.Logs.Info.Info(fmt.Sprintf("get text with name: %s; text: %s;", name, txt))
 	a.sendJSON(w, http.StatusOK, txt)
@@ -80,6 +81,7 @@ func (a *App) Technologies(w http.ResponseWriter, r *http.Request) {
 	tls, err := a.usecase.Technologies(r.Context())
 	if err != nil {
 		a.errorHandle(w, err)
+		return
 	}
 	model.Logs.Info.Info("get technologies list")
 	a.sendJSON(w, http.StatusOK, tls)
@@ -90,6 +92,7 @@ func (a *App) Examples(w http.ResponseWriter, r *http.Request) {
 	els, err := a.usecase.Examples(r.Context())
 	if err != nil {
 		a.errorHandle(w, err)
+		return
 	}
 	model.Logs.Info.Info("get examples list")
 	a.sendJSON(w, http.StatusOK, els)
@@ -100,6 +103,7 @@ func (a *App) Software(w http.ResponseWriter, r *http.Request) {
 	sfw, err := a.usecase.Software(r.Context())
 	if err != nil {
 		a.errorHandle(w, err)
+		return
 	}
 	model.Logs.Info.Info("get software list")
 	a.sendJSON(w, http.StatusOK, sfw)
@@ -110,6 +114,7 @@ func (a *App) Libs(w http.ResponseWriter, r *http.Request) {
 	lbs, err := a.usecase.Libs(r.Context())
 	if err != nil {
 		a.errorHandle(w, err)
+		return
 	}
 	model.Logs.Info.Info("get libs list")
 	a.sendJSON(w, http.StatusOK, lbs)
@@ -120,6 +125,7 @@ func (a *App) Links(w http.ResponseWriter, r *http.Request) {
 	lks, err := a.usecase.Links(r.Context())
 	if err != nil {
 		a.errorHandle(w, err)
+		return
 	}
 	model.Logs.Info.Info("get footer links list")
 	a.sendJSON(w, http.StatusOK, lks)
