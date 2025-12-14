@@ -1,7 +1,11 @@
 name: Integration and Deploy
 on:
   push:
+    paths-ignore:
+      - './.github/workflows/*'
+      - '*.md'
     branches: [main]
+  workflow_dispatch:
 jobs:
   integration:
     runs-on: ubuntu-latest
@@ -26,7 +30,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Pull docker image
-        run: docker pull skvdmt/skvdmt-back:latest
+        run: docker pull ${{ vars.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
       - name: Stop container
         run: docker stop skvdmt-back || true
       - name: Remove container
@@ -38,7 +42,7 @@ jobs:
             --name skvdmt-back \
             -e DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
             --restart unless-stopped \
-            skvdmt/skvdmt-back:latest
+            ${{ vars.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
       - name: Make migration app folder on host if not exists
         run: mkdir -p /usr/src/migrations /usr/src/migrations/skvdmt-back
       - name: Copy migration files from image to host
