@@ -27,35 +27,41 @@ jobs:
           tags: ${{ vars.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
   deployment:
     needs: [integration]
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
-      - name: Pull docker image
-        run: docker pull ${{ vars.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
-      - name: Stop container
-        run: docker stop skvdmt-back || true
-      - name: Remove container
-        run: docker rm skvdmt-back || true
-      - name: Create container
+      - name: Setup SSH connection
         run: |
-          docker create \
-            --network=skvdmt \
-            --name skvdmt-back \
-            -e DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
-            --restart unless-stopped \
-            ${{ vars.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
-      - name: Make migration app folder on host if not exists
-        run: mkdir -p /usr/src/migrations /usr/src/migrations/skvdmt-back
-      - name: Copy migration files from image to host
-        run: docker cp skvdmt-back:/usr/src/skvdmt-back/schema/. /usr/src/migrations/skvdmt-back
-      - name: Run migration
+          mkdir -p ~/.ssh/
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          sudo chmod 600 ~/.ssh/id_rsa
+          echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+        shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
+          SSH_KNOWN_HOSTS: ${{secrets.SSH_KNOWN_HOSTS}}
+      - name: Connect on SSH to server, pull and run application
         run: |
-          docker run --rm \
-            --network=skvdmt \
-            --name migration \
-            -v "/usr/src/migrations/skvdmt-back:/migrations" \
-            migrate/migrate:latest \
-              -path /migrations \
-              -database 'postgres://${{ vars.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@db:5432/${{ vars.POSTGRES_DB }}?sslmode=disable' \
-              up
-      - name: Container start
-        run: docker start skvdmt-back
+          ssh -i ~/.ssh/id_rsa ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} <<EOF
+            docker pull ${{ vars.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
+            docker stop skvdmt-back || true
+            docker rm skvdmt-back || true
+            docker create \
+              --network=skvdmt \
+              --name skvdmt-back \
+              -e DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
+              --restart unless-stopped \
+              ${{ vars.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
+            mkdir -p ~/migrations ~/migrations/skvdmt-back
+            docker cp skvdmt-back:/usr/src/skvdmt-back/schema/. ~/migrations/skvdmt-back
+            docker run --rm \
+              --network=skvdmt \
+              --name migration \
+              -v "~/migrations/skvdmt-back:/migrations" \
+              migrate/migrate:latest \
+                -path /migrations \
+                -database 'postgres://${{ vars.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@db:5432/${{ vars.POSTGRES_DB }}?sslmode=disable' \
+                up
+            docker start skvdmt-back
+          EOF
+          rm -f ~/.ssh/id_rsa
+          rm -f ~/.ssh/known_hosts
