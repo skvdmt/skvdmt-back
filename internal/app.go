@@ -36,7 +36,9 @@ func NewApp(options ...Option) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	model.LoadConfig()
+	if err := model.LoadConfig(); err != nil {
+		return nil, err
+	}
 	if err := model.LoadErrors(); err != nil {
 		return nil, err
 	}
