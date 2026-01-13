@@ -2,62 +2,67 @@ package model
 
 import (
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
+	"path/filepath"
 )
 
 const (
-	// env MODE
-	MODE = "MODE"
-	// MODE values
-	DEV  = "dev"
-	PROD = "prod" // default
-
-	logErrorFile = "/var/log/skvdmt-back/error.log"
-	logFlag      = os.O_CREATE | os.O_APPEND | os.O_RDWR
-	logPerm      = 0666
+	// Путь к директории журналов. (Добавляется директория с именем приложения).
+	logDirectory = "/var/log"
+	// Имя файла журнала ошибок.
+	logFileName = "error.log"
+	logFlag     = os.O_CREATE | os.O_APPEND | os.O_RDWR
+	logPerm     = 0666
 )
 
-// Log
-var Logs *log
+// Logs Глобальная переменная инструмента медения журнала.
+var Logs *Logger
 
-// log simple journaling tool wrapper
-type log struct {
-	Info         *slog.Logger
-	Error        *slog.Logger
-	ErrorLogFile *os.File
+// logger Инструмент ведения журнала.
+type Logger struct {
+	// Журнал информирования.
+	Info *slog.Logger
+	// Журнал ошибок.
+	Error *slog.Logger
+	// Файл журнала ошибок.
+	errorFile *os.File
 }
 
-// Close close open files
-func (l *log) Close() error {
-	if l.ErrorLogFile != nil {
-		return l.ErrorLogFile.Close()
+// Close Закрытие ресурсов логгера.
+func (l *Logger) Close() error {
+	if l.errorFile != nil {
+		return l.errorFile.Close()
 	}
 	return nil
 }
 
-// LoadLogger
+// Loadlogger Создать логгер и установить ссылку на него
+// в глобальную переменную Logs. В логгере создается зеркало
+// ошибок в os.Stderr и файл журнала.
 func LoadLogger() error {
-	n := "models.log.LoadLogger"
-	m, ok := os.LookupEnv(MODE)
-	if !ok {
-		m = PROD
-	}
-	Logs = &log{
-		Info: slog.New(slog.NewTextHandler(os.Stdout, nil)),
-	}
-	switch m {
-	case DEV:
-		Logs.Error = slog.New(slog.NewTextHandler(os.Stderr, nil))
-	case PROD:
-		var err error
-		Logs.ErrorLogFile, err = os.OpenFile(logErrorFile, logFlag, logPerm)
-		if err != nil {
-			return fmt.Errorf("%s %w", n, err)
+	n := "models.logger.Loadlogger"
+	// Создать дерикторию журнала для приложения в случае ее отсутствия.
+	dn := filepath.Join(logDirectory, APP_NAME)
+	if _, err := os.Stat(dn); os.IsNotExist(err) {
+		if err := os.MkdirAll(dn, os.ModePerm); err != nil {
+			return err
 		}
-		Logs.Error = slog.New(slog.NewJSONHandler(Logs.ErrorLogFile, nil))
-	default:
-		return fmt.Errorf("%s unknown %s value %s", n, MODE, m)
+	}
+	// Открыть файл журнала ошибок.
+	fn := filepath.Join(logDirectory, APP_NAME, logFileName)
+	ef, err := os.OpenFile(fn, logFlag, logPerm)
+	if err != nil {
+		return fmt.Errorf("%s %w", n, err)
+	}
+	// Писать журнал ошибок в os.Stderr, а также в файл.
+	ew := io.MultiWriter(os.Stderr, ef)
+	// Создать логгер в глобальной переменной Logs.
+	Logs = &Logger{
+		Info:      slog.New(slog.NewTextHandler(os.Stdout, nil)),
+		Error:     slog.New(slog.NewJSONHandler(ew, nil)),
+		errorFile: ef,
 	}
 	return nil
 }

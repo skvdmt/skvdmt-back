@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -9,16 +8,19 @@ import (
 )
 
 const (
-	CONFIG_DIR           = "/etc"
-	APP_DIR              = "skvdmt-back"
-	POSTGRES_CONFIG_FILE = "postgres.yaml"
-	SERVER_CONFIG_FILE   = "server.yaml"
+	// Название приложения.
+	APP_NAME = "skvdmt-back"
+
+	// Путь в директории конфигурации. (Добавляется директория с именем приложения).
+	configDirectory = "/etc"
+	// Имя файла конфигурации.
+	configFileName = "config.yaml"
 )
 
-// Config singleton app config
-var Config *config
+// Config Глобальная конфигурация.
+var Config *MainConfig
 
-// PostgresConfig database connection config
+// PostgresConfig Конфигурация соединения с postgres.
 type PostgresConfig struct {
 	Host     string `yaml:"host"`
 	Port     uint16 `yaml:"port"`
@@ -32,34 +34,21 @@ type ServerConfig struct {
 	BaseUrl string `yaml:"base_url"`
 }
 
-// config wrapper configs
-type config struct {
-	Postgres *PostgresConfig
-	Server   *ServerConfig
+// MainConfig Основная конфигурация.
+type MainConfig struct {
+	Postgres *PostgresConfig `yaml:"postgres"`
+	Server   *ServerConfig   `yaml:"server"`
 }
 
-// LoadConfig load config files to singleton var Config
+// LoadConfig Загрузка конфигурации в глобальную переменную Config.
 func LoadConfig() error {
-	n := "model.LoadConfig"
-	b, err := os.ReadFile(filepath.Join(CONFIG_DIR, APP_DIR, SERVER_CONFIG_FILE))
+	d, err := os.ReadFile(filepath.Join(configDirectory, APP_NAME, configFileName))
 	if err != nil {
-		return fmt.Errorf("%s %w", n, err)
+		return err
 	}
-	s := &ServerConfig{}
-	if err := yaml.Unmarshal(b, s); err != nil {
-		return fmt.Errorf("%s %w", n, err)
-	}
-	b, err = os.ReadFile(filepath.Join(CONFIG_DIR, APP_DIR, POSTGRES_CONFIG_FILE))
-	if err != nil {
-		return fmt.Errorf("%s %w", n, err)
-	}
-	p := &PostgresConfig{}
-	if err := yaml.Unmarshal(b, p); err != nil {
-		return fmt.Errorf("%s %w", n, err)
-	}
-	Config = &config{
-		Server:   s,
-		Postgres: p,
+	Config := &MainConfig{}
+	if err := yaml.Unmarshal(d, Config); err != nil {
+		return err
 	}
 	return nil
 }

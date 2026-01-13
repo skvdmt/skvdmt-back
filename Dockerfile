@@ -1,19 +1,33 @@
-FROM golang:1.25.3-alpine AS builder
-WORKDIR /usr/src/skvdmt-back
-COPY go.mod go.sum ./
-RUN go mod download
+# Подготовка.
+FROM golang:alpine AS preper
+ARG NAME
+WORKDIR /usr/src/${NAME}
 COPY . .
-RUN go test --tags=unit -v ./...
-RUN go build -v -o /usr/local/bin/skvdmt-back ./cmd/main.go
+COPY ./config /etc
+RUN go mod download
 
-FROM alpine:3.22.2
+# Тестирование.
+FROM preper AS testing
+ARG DB_PASSWORD
+RUN go test --tags=unit -v ./...
+RUN go test --tags=integration -v ./...
+RUN go test --tags=e2e -v ./...
+
+# Сборка.
+FROM preper AS building
+RUN go build -v -o /usr/local/bin/${NAME} ./cmd/main.go
+
+# Релиз.
+FROM alpine AS release
+ARG NAME
+# Настройки.
 RUN apk add tzdata
 RUN ln -s /usr/share/zoneinfo/Europe/Moscow /etc/localtime
-WORKDIR /usr/local/bin
-COPY ./schema /usr/src/skvdmt-back/schema
-COPY --from=builder /usr/local/bin/skvdmt-back ./skvdmt-back
-RUN mkdir -p /var/log/skvdmt-back
-RUN mkdir -p /etc/skvdmt-back
-COPY ./config/* /etc/skvdmt-back
-EXPOSE 8000
-ENTRYPOINT ["skvdmt-back"]
+# Копирование файлов.
+COPY ./config /etc
+COPY --from=building /usr/local/bin/${NAME} /usr/local/bin/${NAME}
+# Создание точки входа.
+COPY ./docker-entrypoint.sh /usr/local/bin
+RUN echo "exec ${NAME}" >> /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+ENTRYPOINT [ "docker-entrypoint.sh" ]

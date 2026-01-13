@@ -20,7 +20,7 @@ var requests = []request{
 	// texts
 	{
 		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
-		args:  []any{"main", "Skidanov Dmitriy"},
+		args:  []any{"main", "Dmitriy Skidanov"},
 	},
 	{
 		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
@@ -48,7 +48,7 @@ var requests = []request{
 	},
 	{
 		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
-		args:  []any{"abou", "Skidanov Dmitriy — full stack engineer 2025"},
+		args:  []any{"abou", "Dmitriy Skidanov — full stack engineer 2026"},
 	},
 	{
 		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
@@ -100,7 +100,7 @@ var requests = []request{
 	},
 	{
 		query: `INSERT INTO libs(url) VALUES($1);`,
-		args:  []any{"https://github.com/sirupsen/logrus"},
+		args:  []any{"https://github.com/jackc/pgx"},
 	},
 	{
 		query: `INSERT INTO libs(url) VALUES($1);`,
