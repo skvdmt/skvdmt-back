@@ -20,7 +20,7 @@ var requests = []request{
 	// texts
 	{
 		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
-		args:  []any{"main", "Dmitriy Skidanov"},
+		args:  []any{"main", "Dmitry Skidanov"},
 	},
 	{
 		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
@@ -48,7 +48,7 @@ var requests = []request{
 	},
 	{
 		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
-		args:  []any{"abou", "Dmitriy Skidanov — full stack engineer 2026"},
+		args:  []any{"abou", "Dmitry Skidanov — full stack engineer 2026"},
 	},
 	{
 		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
