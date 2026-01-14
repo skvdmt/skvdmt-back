@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"net/url"
 	"os"
 	"time"
 
@@ -48,10 +47,6 @@ func NewApp() (*App, error) {
 	pwd, ok := os.LookupEnv(DB_PASSWORD)
 	if !ok {
 		return nil, fmt.Errorf("env %s unset", DB_PASSWORD)
-	}
-	pwd, err := url.QueryUnescape(pwd)
-	if err != nil {
-		return nil, err
 	}
 	q := fmt.Sprintf(
 		"%s://%s:%s@%s:%d/%s",
