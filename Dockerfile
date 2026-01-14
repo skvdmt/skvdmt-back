@@ -19,6 +19,7 @@ RUN go build -v -o /usr/local/bin/${NAME} ./cmd/main.go
 
 # Релиз.
 FROM alpine AS release
+EXPOSE 8000
 ARG NAME
 # Настройки.
 RUN apk add tzdata
