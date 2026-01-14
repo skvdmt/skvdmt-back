@@ -1,5 +1,3 @@
-FROM alpine:3.22.2
-WORKDIR /usr/local/bin
-RUN mkdir -p /var/log/skvdmt-back
-RUN mkdir -p /etc/skvdmt-back
-CMD ["skvdmt-back"]
+FROM ubuntu
+COPY ./config /etc
+ENTRYPOINT [ "skvdmt-back" ]

@@ -28,7 +28,7 @@ type PostgresConfig struct {
 	Database string `yaml:"database"`
 }
 
-// ServerConfig http server config
+// ServerConfig Конфигурация HTTP сервера.
 type ServerConfig struct {
 	Port    uint16 `yaml:"port"`
 	BaseUrl string `yaml:"base_url"`
@@ -46,9 +46,10 @@ func LoadConfig() error {
 	if err != nil {
 		return err
 	}
-	Config := &MainConfig{}
-	if err := yaml.Unmarshal(d, Config); err != nil {
+	cfg := &MainConfig{}
+	if err := yaml.Unmarshal(d, cfg); err != nil {
 		return err
 	}
+	Config = cfg
 	return nil
 }
