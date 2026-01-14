@@ -1,45 +1,27 @@
 package delivery
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"path"
+	"time"
 
-	erw "github.com/skvdmt/errwrap"
 	"github.com/skvdmt/skvdmt-back/internal/model"
 	"github.com/skvdmt/skvdmt-back/internal/usecase"
+	erw "github.com/skvdmt/skvdmt-back/pkg/errwrap"
 )
 
-// App trasport layer application
-type App struct {
-	router  *http.ServeMux
-	usecase Usecase
-}
-
-// NewApp constructor trasport layer application
-func NewApp() (*App, error) {
-	uc, err := usecase.NewApp()
-	if err != nil {
-		return nil, err
-	}
-	a := &App{
-		usecase: uc,
-		router:  http.NewServeMux(),
-	}
-	a.setRoutes()
-	return a, nil
-}
-
-// Close
-func (a *App) Close() error {
-	return nil
-}
-
 const (
+	defaultTimeout        = 10
+	defaultMaxHeaderBytes = 1 << 20 // 1Mb
+
 	pkg = "delivery"
 	app = "app"
 
+	get              = "GET %s"
 	url_text         = "/text/{id}"
 	url_technologies = "/technologies"
 	url_examples     = "/examples"
@@ -48,23 +30,77 @@ const (
 	url_links        = "/links"
 )
 
-// SetRoutes setting up the main segment router of the application
-func (a *App) setRoutes() {
+// App Транспортный слой.
+type App struct {
+	router  *http.ServeMux
+	server  *http.Server
+	usecase Usecase
+}
+
+// NewApp Конструктор.
+func NewApp() (*App, error) {
+	model.Logs.Info.Info("delivery layer creating")
+	// Создание сервисного слоя.
+	uc, err := usecase.NewApp()
+	if err != nil {
+		return nil, err
+	}
+	// Создание сервера.
+	r := http.NewServeMux()
+	return &App{
+		usecase: uc,
+		router:  r,
+		server: &http.Server{
+			Addr:           fmt.Sprintf(":%d", model.Config.Server.Port),
+			Handler:        r,
+			ReadTimeout:    defaultTimeout * time.Second,
+			WriteTimeout:   defaultTimeout * time.Second,
+			MaxHeaderBytes: defaultMaxHeaderBytes,
+		},
+	}, nil
+}
+
+// Stop Остановка транспортного слоя.
+func (a *App) Stop(ctx context.Context) error {
+	// Остановка сервера.
+	if err := a.server.Shutdown(ctx); err != nil {
+		return err
+	}
+	model.Logs.Info.Info("http server shutdown")
+	// Остановка сервисного слоя.
+	if err := a.usecase.Stop(ctx); err != nil {
+		return err
+	}
+	model.Logs.Info.Info("delivery layer stopped")
+	return nil
+}
+
+// Start Запуск транспортного слоя.
+func (a *App) Start(ctx context.Context) error {
+	model.Logs.Info.Info("delivery layer starting")
+	a.routes()
+	model.Logs.Info.Info(fmt.Sprintf("http server starting on %d port",
+		model.Config.Server.Port))
+	if err := a.server.ListenAndServe(); err != nil &&
+		!errors.Is(err, http.ErrServerClosed) {
+		return err
+	}
+	return nil
+}
+
+// routes Настройка маршрутов.
+func (a *App) routes() error {
 	bu := model.Config.Server.BaseUrl
-	a.router.HandleFunc(fmt.Sprintf("GET %s", path.Join(bu, url_text)), a.Text)
-	a.router.HandleFunc(fmt.Sprintf("GET %s", path.Join(bu, url_technologies)), a.Technologies)
-	a.router.HandleFunc(fmt.Sprintf("GET %s", path.Join(bu, url_examples)), a.Examples)
-	a.router.HandleFunc(fmt.Sprintf("GET %s", path.Join(bu, url_software)), a.Software)
-	a.router.HandleFunc(fmt.Sprintf("GET %s", path.Join(bu, url_libs)), a.Libs)
-	a.router.HandleFunc(fmt.Sprintf("GET %s", path.Join(bu, url_links)), a.Links)
+	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_text)), a.Text)
+	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_technologies)), a.Technologies)
+	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_examples)), a.Examples)
+	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_software)), a.Software)
+	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_libs)), a.Libs)
+	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_links)), a.Links)
+	return nil
 }
 
-// Router
-func (a *App) Router() http.Handler {
-	return a.router
-}
-
-// Text handler homepage implementation
+// Text Обработчик запроса текста.
 func (a *App) Text(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("id")
 	txt, err := a.usecase.Text(r.Context(), name)
@@ -72,73 +108,73 @@ func (a *App) Text(w http.ResponseWriter, r *http.Request) {
 		a.errorHandle(w, err)
 		return
 	}
-	model.Logs.Info.Info(fmt.Sprintf("get text with name: %s; text: %s;", name, txt))
+	model.Logs.Info.Info(fmt.Sprintf("get text with name: %s", name))
 	a.sendJSON(w, http.StatusOK, txt)
 }
 
-// Technologies handler homepage implementation
+// Technologies Обработчик запроса технологий.
 func (a *App) Technologies(w http.ResponseWriter, r *http.Request) {
 	tls, err := a.usecase.Technologies(r.Context())
 	if err != nil {
 		a.errorHandle(w, err)
 		return
 	}
-	model.Logs.Info.Info("get technologies list")
+	model.Logs.Info.Info("get technologies")
 	a.sendJSON(w, http.StatusOK, tls)
 }
 
-// Examples handler homepage implementation
+// Examples Обработчик запроса примеров.
 func (a *App) Examples(w http.ResponseWriter, r *http.Request) {
 	els, err := a.usecase.Examples(r.Context())
 	if err != nil {
 		a.errorHandle(w, err)
 		return
 	}
-	model.Logs.Info.Info("get examples list")
+	model.Logs.Info.Info("get examples")
 	a.sendJSON(w, http.StatusOK, els)
 }
 
-// Software handler homepage implementation
+// Software Обработчик запроса программ.
 func (a *App) Software(w http.ResponseWriter, r *http.Request) {
 	sfw, err := a.usecase.Software(r.Context())
 	if err != nil {
 		a.errorHandle(w, err)
 		return
 	}
-	model.Logs.Info.Info("get software list")
+	model.Logs.Info.Info("get software")
 	a.sendJSON(w, http.StatusOK, sfw)
 }
 
-// Libs handler homepage implementation
+// Libs Обработчик запроса бибилиотек.
 func (a *App) Libs(w http.ResponseWriter, r *http.Request) {
 	lbs, err := a.usecase.Libs(r.Context())
 	if err != nil {
 		a.errorHandle(w, err)
 		return
 	}
-	model.Logs.Info.Info("get libs list")
+	model.Logs.Info.Info("get libs")
 	a.sendJSON(w, http.StatusOK, lbs)
 }
 
-// Links handler homepage implementation
+// Links Обработчик запроса ссылкок.
 func (a *App) Links(w http.ResponseWriter, r *http.Request) {
 	lks, err := a.usecase.Links(r.Context())
 	if err != nil {
 		a.errorHandle(w, err)
 		return
 	}
-	model.Logs.Info.Info("get footer links list")
+	model.Logs.Info.Info("get links")
 	a.sendJSON(w, http.StatusOK, lks)
 }
 
-// sendJSON send json response
+// sendJSON Отправка ответа в JSON.
 func (a *App) sendJSON(w http.ResponseWriter, code int, value any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	json.NewEncoder(w).Encode(value)
 }
 
-// errorHandle sending and logging error
+// errorHandle Логирование и отправка ошибок.
 func (a *App) errorHandle(w http.ResponseWriter, err error) {
 	const m = "errorHandle"
 	var e *erw.ErrorWrapper

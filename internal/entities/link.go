@@ -2,7 +2,7 @@ package entities
 
 import "github.com/google/uuid"
 
-// Link entity
+// Link Ссылка.
 type Link struct {
 	Id    uuid.UUID `json:"id"`
 	Title string    `json:"title"`

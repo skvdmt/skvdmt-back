@@ -2,7 +2,7 @@ package entities
 
 import "github.com/google/uuid"
 
-// Technology entity
+// Technology Технология.
 type Technology struct {
 	Id    uuid.UUID `json:"id"`
 	Title string    `json:"title"`

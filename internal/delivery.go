@@ -1,9 +1,11 @@
 package internal
 
-import "net/http"
+import "context"
 
-// Delivery transport application interface
+// Delivery Интерфейс транспортного слоя.
 type Delivery interface {
-	Router() http.Handler
-	Close() error
+	// Запуск.
+	Start(ctx context.Context) error
+	// Остановка.
+	Stop(ctx context.Context) error
 }

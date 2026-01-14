@@ -2,7 +2,7 @@ package entities
 
 import "github.com/google/uuid"
 
-// Example entity
+// Example Пример.
 type Example struct {
 	Id           uuid.UUID     `json:"id"`
 	Name         string        `json:"name"`

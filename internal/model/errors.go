@@ -4,9 +4,13 @@ import (
 	"fmt"
 )
 
+// Errors Глобальный канал ошибок.
+var Errors chan error
+
+// Errs Глобальная переменная с картой описания ошибок.
 var Errs errs
 
-// errs
+// errs Карта с описание ошибок.
 type errs map[int]error
 
 const (
@@ -17,13 +21,14 @@ const (
 	ErrConvertionCache
 )
 
-// LoadErrors
+// LoadErrors загрузка описания ошибок.
 func LoadErrors() error {
-	Errs := make(errs)
-	Errs[ErrTextNotFound] = fmt.Errorf("text not found")
-	Errs[ErrIncorrectTextId] = fmt.Errorf("incorrect text id")
-	Errs[ErrDatabase] = fmt.Errorf("error database")
-	Errs[ErrConvertionError] = fmt.Errorf("can't conversion error")
-	Errs[ErrConvertionCache] = fmt.Errorf("can't conversion cache")
+	e := make(errs)
+	e[ErrTextNotFound] = fmt.Errorf("text not found")
+	e[ErrIncorrectTextId] = fmt.Errorf("incorrect text id")
+	e[ErrDatabase] = fmt.Errorf("error database")
+	e[ErrConvertionError] = fmt.Errorf("can't conversion error")
+	e[ErrConvertionCache] = fmt.Errorf("can't conversion cache")
+	Errs = e
 	return nil
 }

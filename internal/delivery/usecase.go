@@ -6,12 +6,20 @@ import (
 	"github.com/skvdmt/skvdmt-back/internal/entities"
 )
 
-// Usecase application businer logic interface
+// Usecase Интерфейс сервисного слоя.
 type Usecase interface {
-	Text(c context.Context, name string) (*entities.Text, error)
-	Technologies(c context.Context) (*[]entities.Technology, error)
-	Examples(c context.Context) (*[]entities.Example, error)
-	Software(c context.Context) (*[]entities.Software, error)
-	Libs(c context.Context) (*[]entities.Lib, error)
-	Links(c context.Context) (*[]entities.Link, error)
+	// Остановка.
+	Stop(ctx context.Context) error
+	// Сервис текстов.
+	Text(ctx context.Context, name string) (*entities.Text, error)
+	// Сервис технологий.
+	Technologies(ctx context.Context) (*[]entities.Technology, error)
+	// Сервис примеров.
+	Examples(ctx context.Context) (*[]entities.Example, error)
+	// Сервис программ.
+	Software(ctx context.Context) (*[]entities.Software, error)
+	// Сервис библиотек.
+	Libs(ctx context.Context) (*[]entities.Lib, error)
+	// Сервис ссылкок.
+	Links(ctx context.Context) (*[]entities.Link, error)
 }

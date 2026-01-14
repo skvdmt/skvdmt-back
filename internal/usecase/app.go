@@ -4,16 +4,20 @@ import (
 	"context"
 
 	"github.com/skvdmt/skvdmt-back/internal/entities"
+	"github.com/skvdmt/skvdmt-back/internal/model"
 	"github.com/skvdmt/skvdmt-back/internal/repository"
 )
 
-// App usecase layer application
+// App Сервисный слой.
 type App struct {
+	// Репозиторный слой.
 	repository Repository
 }
 
-// NewHome constructor usecase layer application
+// NewHome Конструктор.
 func NewApp() (*App, error) {
+	model.Logs.Info.Info("usecase layer creating")
+	// Создание репозиторного слоя.
 	rep, err := repository.NewApp()
 	if err != nil {
 		return nil, err
@@ -23,32 +27,42 @@ func NewApp() (*App, error) {
 	}, nil
 }
 
-// Text service homepage implementation
+// Stop Остановка.
+func (a *App) Stop(ctx context.Context) error {
+	// Остановка репозиторного слоя.
+	if err := a.repository.Stop(ctx); err != nil {
+		return err
+	}
+	model.Logs.Info.Info("usecase layer stopped")
+	return nil
+}
+
+// Text Сервис текстов.
 func (a *App) Text(c context.Context, name string) (*entities.Text, error) {
 	return a.repository.Text(c, name)
 }
 
-// Technologies service homepage implementation
+// Technologies Сервис технологий.
 func (a *App) Technologies(c context.Context) (*[]entities.Technology, error) {
 	return a.repository.Technologies(c)
 }
 
-// Examples service homepage implementation
+// Examples Сервис примеров.
 func (a *App) Examples(c context.Context) (*[]entities.Example, error) {
 	return a.repository.Examples(c)
 }
 
-// Software service homepage implementation
+// Software Сервис программ.
 func (a *App) Software(c context.Context) (*[]entities.Software, error) {
 	return a.repository.Software(c)
 }
 
-// Libs service homepage implementation
+// Libs Сервис библиотек.
 func (a *App) Libs(c context.Context) (*[]entities.Lib, error) {
 	return a.repository.Libs(c)
 }
 
-// Links service homepage implementation
+// Links Сервис ссылок.
 func (a *App) Links(c context.Context) (*[]entities.Link, error) {
 	return a.repository.Links(c)
 }

@@ -12,10 +12,10 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/patrickmn/go-cache"
-	erw "github.com/skvdmt/errwrap"
 	"github.com/skvdmt/skvdmt-back/init/inserts"
 	"github.com/skvdmt/skvdmt-back/internal/entities"
 	"github.com/skvdmt/skvdmt-back/internal/model"
+	erw "github.com/skvdmt/skvdmt-back/pkg/errwrap"
 )
 
 const (
@@ -29,7 +29,7 @@ const (
 	sources      = "sources"
 )
 
-// App
+// App Репозиторный слой.
 type App struct {
 	cache *cache.Cache
 	db    *pgxpool.Pool
@@ -40,9 +40,11 @@ const (
 	DB_PASSWORD = "DB_PASSWORD"
 )
 
-// NewApp
+// NewApp Конструктор.
 func NewApp() (*App, error) {
-	pwd, ok := os.LookupEnv("DB_PASSWORD")
+	model.Logs.Info.Info("repository layer creating")
+	model.Logs.Info.Info("database connection creating")
+	pwd, ok := os.LookupEnv(DB_PASSWORD)
 	if !ok {
 		return nil, fmt.Errorf("env %s unset", DB_PASSWORD)
 	}
@@ -60,20 +62,32 @@ func NewApp() (*App, error) {
 		return nil, err
 	}
 
-	// insert default data to database tables
+	model.Logs.Info.Info("insert data to database")
+	// Вставка данных в базу данных.
 	inserts.InsertData(dbpool)
 
+	model.Logs.Info.Info("cache creating")
+	c := cache.New(2*time.Minute, 20*time.Second)
+
 	return &App{
-		cache: cache.New(2*time.Minute, 20*time.Second),
+		cache: c,
 		db:    dbpool,
 	}, nil
 }
 
-func (a *App) Close() error {
+// Stop Остановка.
+func (a *App) Stop(ctx context.Context) error {
+	// Очистка кэша.
+	a.cache.Flush()
+	model.Logs.Info.Info("cache flushed")
+	// Закрытие соединения с базой данных.
+	a.db.Close()
+	model.Logs.Info.Info("database connection closed")
+	model.Logs.Info.Info("repository layer stopped")
 	return nil
 }
 
-// Text repository homepage implementation
+// Text Репозиторий текстов.
 func (a *App) Text(c context.Context, name string) (*entities.Text, error) {
 	data, ok := a.cache.Get(fmt.Sprintf("%s_%s", text, name))
 	if !ok {
@@ -107,7 +121,7 @@ func (a *App) Text(c context.Context, name string) (*entities.Text, error) {
 			Id:   cl.Id,
 			Text: cl.Text,
 		}
-		// setting to cache
+		// Установка кэша.
 		a.cache.Set(fmt.Sprintf("%s_%s", text, name), txt, cache.DefaultExpiration)
 		return txt, nil
 	}
@@ -121,7 +135,7 @@ func (a *App) Text(c context.Context, name string) (*entities.Text, error) {
 	return txt, nil
 }
 
-// Technologies repository homepage implementation
+// Technologies Репозиторий технологий.
 func (a *App) Technologies(c context.Context) (*[]entities.Technology, error) {
 	data, ok := a.cache.Get(technologies)
 	if !ok {
@@ -153,7 +167,7 @@ func (a *App) Technologies(c context.Context) (*[]entities.Technology, error) {
 				Url:   cl.Url,
 			})
 		}
-		// setting to cache
+		// Установка кэша.
 		a.cache.Set(technologies, tls, cache.DefaultExpiration)
 		return tls, nil
 	}
@@ -167,7 +181,7 @@ func (a *App) Technologies(c context.Context) (*[]entities.Technology, error) {
 	return tls, nil
 }
 
-// Examples repository homepage implementation
+// Examples Репозиторий примеров.
 func (a *App) Examples(c context.Context) (*[]entities.Example, error) {
 	data, ok := a.cache.Get(examples)
 	if !ok {
@@ -218,6 +232,7 @@ func (a *App) Examples(c context.Context) (*[]entities.Example, error) {
 			}
 			*exs = append(*exs, ex)
 		}
+		// Установка кэша.
 		a.cache.Set(examples, exs, cache.DefaultExpiration)
 		return exs, nil
 	}
@@ -232,7 +247,7 @@ func (a *App) Examples(c context.Context) (*[]entities.Example, error) {
 
 }
 
-// Software repository homepage implementation
+// Software Репозиторий программ.
 func (a *App) Software(c context.Context) (*[]entities.Software, error) {
 	data, ok := a.cache.Get(software)
 	if !ok {
@@ -264,7 +279,7 @@ func (a *App) Software(c context.Context) (*[]entities.Software, error) {
 				Url:   cl.Url,
 			})
 		}
-		// setting to cache
+		// Установка кэша.
 		a.cache.Set(software, sfw, cache.DefaultExpiration)
 		return sfw, nil
 	}
@@ -278,7 +293,7 @@ func (a *App) Software(c context.Context) (*[]entities.Software, error) {
 	return sfw, nil
 }
 
-// Libs repository homepage implementation
+// Libs Репозиторий библиотек.
 func (a *App) Libs(c context.Context) (*[]entities.Lib, error) {
 	data, ok := a.cache.Get(libs)
 	if !ok {
@@ -309,7 +324,7 @@ func (a *App) Libs(c context.Context) (*[]entities.Lib, error) {
 				Url: cl.Url,
 			})
 		}
-		// setting to cache
+		// Установка кэша.
 		a.cache.Set(libs, lbs, cache.DefaultExpiration)
 		return lbs, nil
 	}
@@ -323,7 +338,7 @@ func (a *App) Libs(c context.Context) (*[]entities.Lib, error) {
 	return lbs, nil
 }
 
-// Links repository homepage implementation
+// Links Репозиторий ссылок.
 func (a *App) Links(c context.Context) (*[]entities.Link, error) {
 	data, ok := a.cache.Get(links)
 	if !ok {
@@ -355,7 +370,7 @@ func (a *App) Links(c context.Context) (*[]entities.Link, error) {
 				Url:   cl.Url,
 			})
 		}
-		// setting to cache
+		// Установка кэша.
 		a.cache.Set(links, lks, cache.DefaultExpiration)
 		return lks, nil
 	}
@@ -370,7 +385,7 @@ func (a *App) Links(c context.Context) (*[]entities.Link, error) {
 	return lks, nil
 }
 
-// exampleLinks getting links of example by id
+// exampleLinks Ссылки примера.
 func (a *App) exampleLinks(c context.Context, exampleID uuid.UUID) (*[]entities.Link, error) {
 	query := fmt.Sprintf(`SELECT %s, %s, %s
 			FROM %s
@@ -409,7 +424,7 @@ func (a *App) exampleLinks(c context.Context, exampleID uuid.UUID) (*[]entities.
 	return lks, nil
 }
 
-// exampleTechnologies getting technologies of example by id
+// exampleTechnologies Технологии примера.
 func (a *App) exampleTechnologies(c context.Context, exampleID uuid.UUID) (*[]entities.Technology, error) {
 	query := fmt.Sprintf(`SELECT %s, %s, %s
 			FROM %s
@@ -448,7 +463,7 @@ func (a *App) exampleTechnologies(c context.Context, exampleID uuid.UUID) (*[]en
 	return tks, nil
 }
 
-// exampleSources getting sources of example by id
+// exampleSources Исходники примера.
 func (a *App) exampleSources(c context.Context, exampleID uuid.UUID) (*[]entities.Source, error) {
 	query := fmt.Sprintf(`SELECT %s, %s
 			FROM %s
