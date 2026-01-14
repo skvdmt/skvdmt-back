@@ -1,4 +1,4 @@
-# skvdmt-back v1.0.0
+# skvdmt-back
 
 Backend REST API for getting text information for https://skvdmt.ru/
 
