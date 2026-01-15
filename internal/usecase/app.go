@@ -15,10 +15,10 @@ type App struct {
 }
 
 // NewHome Конструктор.
-func NewApp() (*App, error) {
+func NewApp(ctx context.Context) (*App, error) {
 	model.Logs.Info.Info("usecase layer creating")
 	// Создание репозиторного слоя.
-	rep, err := repository.NewApp()
+	rep, err := repository.NewApp(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -38,31 +38,31 @@ func (a *App) Stop(ctx context.Context) error {
 }
 
 // Text Сервис текстов.
-func (a *App) Text(c context.Context, name string) (*entities.Text, error) {
-	return a.repository.Text(c, name)
+func (a *App) Text(ctx context.Context, name string) (*entities.Text, error) {
+	return a.repository.Text(ctx, name)
 }
 
 // Technologies Сервис технологий.
-func (a *App) Technologies(c context.Context) (*[]entities.Technology, error) {
-	return a.repository.Technologies(c)
+func (a *App) Technologies(ctx context.Context) ([]*entities.Technology, error) {
+	return a.repository.Technologies(ctx)
 }
 
 // Examples Сервис примеров.
-func (a *App) Examples(c context.Context) (*[]entities.Example, error) {
-	return a.repository.Examples(c)
+func (a *App) Examples(ctx context.Context) ([]*entities.Example, error) {
+	return a.repository.Examples(ctx)
 }
 
 // Software Сервис программ.
-func (a *App) Software(c context.Context) (*[]entities.Software, error) {
-	return a.repository.Software(c)
+func (a *App) Software(ctx context.Context) ([]*entities.Software, error) {
+	return a.repository.Software(ctx)
 }
 
 // Libs Сервис библиотек.
-func (a *App) Libs(c context.Context) (*[]entities.Lib, error) {
-	return a.repository.Libs(c)
+func (a *App) Libs(ctx context.Context) ([]*entities.Lib, error) {
+	return a.repository.Libs(ctx)
 }
 
 // Links Сервис ссылок.
-func (a *App) Links(c context.Context) (*[]entities.Link, error) {
-	return a.repository.Links(c)
+func (a *App) Links(ctx context.Context) ([]*entities.Link, error) {
+	return a.repository.Links(ctx)
 }

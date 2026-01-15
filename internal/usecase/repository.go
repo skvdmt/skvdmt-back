@@ -11,15 +11,15 @@ type Repository interface {
 	// Остановка.
 	Stop(ctx context.Context) error
 	// Репозиторий текста.
-	Text(c context.Context, name string) (*entities.Text, error)
+	Text(ctx context.Context, name string) (*entities.Text, error)
 	// Репозиторий технологий.
-	Technologies(c context.Context) (*[]entities.Technology, error)
+	Technologies(ctx context.Context) ([]*entities.Technology, error)
 	// Репозиторий примеров.
-	Examples(c context.Context) (*[]entities.Example, error)
+	Examples(ctx context.Context) ([]*entities.Example, error)
 	// Репозиторий программ.
-	Software(c context.Context) (*[]entities.Software, error)
+	Software(ctx context.Context) ([]*entities.Software, error)
 	// Репозиторий библиотек.
-	Libs(c context.Context) (*[]entities.Lib, error)
+	Libs(ctx context.Context) ([]*entities.Lib, error)
 	// Репозиторий ссылок.
-	Links(c context.Context) (*[]entities.Link, error)
+	Links(ctx context.Context) ([]*entities.Link, error)
 }

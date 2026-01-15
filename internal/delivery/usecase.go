@@ -13,13 +13,13 @@ type Usecase interface {
 	// Сервис текстов.
 	Text(ctx context.Context, name string) (*entities.Text, error)
 	// Сервис технологий.
-	Technologies(ctx context.Context) (*[]entities.Technology, error)
+	Technologies(ctx context.Context) ([]*entities.Technology, error)
 	// Сервис примеров.
-	Examples(ctx context.Context) (*[]entities.Example, error)
+	Examples(ctx context.Context) ([]*entities.Example, error)
 	// Сервис программ.
-	Software(ctx context.Context) (*[]entities.Software, error)
+	Software(ctx context.Context) ([]*entities.Software, error)
 	// Сервис библиотек.
-	Libs(ctx context.Context) (*[]entities.Lib, error)
+	Libs(ctx context.Context) ([]*entities.Lib, error)
 	// Сервис ссылкок.
-	Links(ctx context.Context) (*[]entities.Link, error)
+	Links(ctx context.Context) ([]*entities.Link, error)
 }

@@ -38,10 +38,10 @@ type App struct {
 }
 
 // NewApp Конструктор.
-func NewApp() (*App, error) {
+func NewApp(ctx context.Context) (*App, error) {
 	model.Logs.Info.Info("delivery layer creating")
 	// Создание сервисного слоя.
-	uc, err := usecase.NewApp()
+	uc, err := usecase.NewApp(ctx)
 	if err != nil {
 		return nil, err
 	}

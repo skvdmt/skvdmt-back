@@ -2,20 +2,21 @@ package repository
 
 import "github.com/google/uuid"
 
-// Text data transfer object entity for database requests
+// Text Объект передачи данных для запросов к базе данных.
 type Text struct {
 	Id   uuid.UUID `db:"id"`
+	Name string    `db:"name"`
 	Text string    `db:"text"`
 }
 
-// Technology data transfer object entity for database requests
+// Technology Объект передачи данных для запросов к базе данных.
 type Technology struct {
 	Id    uuid.UUID `db:"id"`
 	Title string    `db:"title"`
 	Url   string    `db:"url"`
 }
 
-// Example data transfer object entity for database requests
+// Example Объект передачи данных для запросов к базе данных.
 type Example struct {
 	Id          uuid.UUID `db:"id"`
 	Name        string    `db:"name"`
@@ -23,26 +24,26 @@ type Example struct {
 	Description string    `db:"description"`
 }
 
-// Source data transfer object entity for database requests
+// Source Объект передачи данных для запросов к базе данных.
 type Source struct {
 	Id  uuid.UUID `db:"id"`
 	Url string    `db:"url"`
 }
 
-// Lib data transfer object entity for database requests
+// Lib Объект передачи данных для запросов к базе данных.
 type Lib struct {
 	Id  uuid.UUID `db:"id"`
 	Url string    `db:"url"`
 }
 
-// Link data transfer object entity for database requests
+// Link Объект передачи данных для запросов к базе данных.
 type Link struct {
 	Id    uuid.UUID `db:"id"`
 	Title string    `db:"title"`
 	Url   string    `db:"url"`
 }
 
-// Software data transfer object entity for database requests
+// Software Объект передачи данных для запросов к базе данных.
 type Software struct {
 	Id    uuid.UUID `db:"id"`
 	Title string    `db:"title"`

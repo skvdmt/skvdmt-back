@@ -2,16 +2,14 @@ package repository
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 	"fmt"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/patrickmn/go-cache"
 	"github.com/skvdmt/skvdmt-back/init/inserts"
 	"github.com/skvdmt/skvdmt-back/internal/entities"
 	"github.com/skvdmt/skvdmt-back/internal/model"
@@ -19,20 +17,36 @@ import (
 )
 
 const (
-	pkg          = "repository"
-	text         = "text"
-	technologies = "technologies"
-	examples     = "examples"
-	software     = "software"
-	libs         = "libs"
-	links        = "links"
-	sources      = "sources"
+	pkg            = "repository"
+	text           = "text"
+	technologies   = "technologies"
+	examples       = "examples"
+	software       = "software"
+	libs           = "libs"
+	links          = "links"
+	sources        = "sources"
+	updateInterval = 5
 )
 
 // App Репозиторный слой.
 type App struct {
-	cache *cache.Cache
-	db    *pgxpool.Pool
+	db             *pgxpool.Pool
+	muTexts        *sync.RWMutex
+	muTechnologies *sync.RWMutex
+	muExamples     *sync.RWMutex
+	muSoftware     *sync.RWMutex
+	muLinks        *sync.RWMutex
+	muLibs         *sync.RWMutex
+	updateRunner   *time.Ticker
+	exit           chan struct{}
+	update         *sync.WaitGroup
+	source         *sync.WaitGroup
+	texts          map[string]*entities.Text
+	technologies   []*entities.Technology
+	examples       []*entities.Example
+	software       []*entities.Software
+	links          []*entities.Link
+	libs           []*entities.Lib
 }
 
 const (
@@ -41,7 +55,7 @@ const (
 )
 
 // NewApp Конструктор.
-func NewApp() (*App, error) {
+func NewApp(ctx context.Context) (*App, error) {
 	model.Logs.Info.Info("repository layer creating")
 	model.Logs.Info.Info("database connection creating")
 	pwd, ok := os.LookupEnv(DB_PASSWORD)
@@ -57,7 +71,7 @@ func NewApp() (*App, error) {
 		model.Config.Postgres.Port,
 		model.Config.Postgres.Database,
 	)
-	dbpool, err := pgxpool.New(context.Background(), q)
+	dbpool, err := pgxpool.New(ctx, q)
 	if err != nil {
 		return nil, err
 	}
@@ -66,20 +80,35 @@ func NewApp() (*App, error) {
 	// Вставка данных в базу данных.
 	inserts.InsertData(dbpool)
 
-	model.Logs.Info.Info("cache creating")
-	c := cache.New(2*time.Minute, 20*time.Second)
+	a := &App{
+		db:             dbpool,
+		texts:          make(map[string]*entities.Text),
+		exit:           make(chan struct{}),
+		updateRunner:   time.NewTicker(time.Minute * updateInterval),
+		update:         &sync.WaitGroup{},
+		source:         &sync.WaitGroup{},
+		muTexts:        &sync.RWMutex{},
+		muTechnologies: &sync.RWMutex{},
+		muExamples:     &sync.RWMutex{},
+		muSoftware:     &sync.RWMutex{},
+		muLinks:        &sync.RWMutex{},
+		muLibs:         &sync.RWMutex{},
+	}
+	// Первый запуск обновлений.
+	a.updateAll(ctx)
 
-	return &App{
-		cache: c,
-		db:    dbpool,
-	}, nil
+	// Запуск ресурса.
+	a.source.Add(1)
+	go a.handler(ctx)
+	return a, nil
 }
 
 // Stop Остановка.
 func (a *App) Stop(ctx context.Context) error {
-	// Очистка кэша.
-	a.cache.Flush()
-	model.Logs.Info.Info("cache flushed")
+	// Отправляем сигнал завершения.
+	a.exit <- struct{}{}
+	// Ожидание завершения всех ресурсов.
+	a.source.Wait()
 	// Закрытие соединения с базой данных.
 	a.db.Close()
 	model.Logs.Info.Info("database connection closed")
@@ -88,305 +117,318 @@ func (a *App) Stop(ctx context.Context) error {
 }
 
 // Text Репозиторий текстов.
-func (a *App) Text(c context.Context, name string) (*entities.Text, error) {
-	data, ok := a.cache.Get(fmt.Sprintf("%s_%s", text, name))
+func (a *App) Text(ctx context.Context, name string) (*entities.Text, error) {
+	a.muTexts.RLock()
+	t, ok := a.texts[name]
+	a.muTexts.RUnlock()
 	if !ok {
-		const query = "select id, text from texts where name = $1 order by id"
-		row, err := a.db.Query(c, query, name)
-		if err != nil {
-			return nil, erw.New(erw.Internal(
+		return nil, erw.New(
+			erw.CodeHTTP(404),
+			erw.Internal(
 				erw.Location(pkg, text),
-				erw.Error(err),
-				erw.SQL(query, name),
+				erw.Error(model.Errs[model.ErrTextNotFound]),
 			))
-		}
-		cl, err := pgx.CollectOneRow(row, pgx.RowToStructByName[Text])
-		if err != nil {
-			if errors.Is(err, sql.ErrNoRows) {
-				return nil, erw.New(
-					erw.CodeHTTP(404),
-					erw.Internal(
-						erw.Location(pkg, text),
-						erw.Error(err),
-						erw.SQL(query, name),
-					))
-			}
-			return nil, erw.New(erw.Internal(
-				erw.Location(pkg, text),
-				erw.Error(err),
-				erw.SQL(query, name),
-			))
-		}
-		txt := &entities.Text{
-			Id:   cl.Id,
-			Text: cl.Text,
-		}
-		// Установка кэша.
-		a.cache.Set(fmt.Sprintf("%s_%s", text, name), txt, cache.DefaultExpiration)
-		return txt, nil
 	}
-	txt, ok := data.(*entities.Text)
-	if !ok {
-		return nil, erw.New(erw.Internal(
-			erw.Location(pkg, text),
-			erw.Error(model.Errs[model.ErrConvertionCache]),
-		))
-	}
-	return txt, nil
+	return t, nil
 }
 
 // Technologies Репозиторий технологий.
-func (a *App) Technologies(c context.Context) (*[]entities.Technology, error) {
-	data, ok := a.cache.Get(technologies)
-	if !ok {
-		query := fmt.Sprintf(
-			"select %s, %s, %s from %s order by id",
-			"id", "title", "url", technologies,
-		)
-		rows, err := a.db.Query(c, query)
-		if err != nil {
-			return nil, erw.New(erw.Internal(
-				erw.Location(pkg, technologies),
-				erw.Error(err),
-				erw.SQL(query),
-			))
-		}
-		cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Technology])
-		if err != nil {
-			return nil, erw.New(erw.Internal(
-				erw.Location(pkg, technologies),
-				erw.Error(err),
-				erw.SQL(query),
-			))
-		}
-		tls := new([]entities.Technology)
-		for _, cl := range cls {
-			*tls = append(*tls, entities.Technology{
-				Id:    cl.Id,
-				Title: cl.Title,
-				Url:   cl.Url,
-			})
-		}
-		// Установка кэша.
-		a.cache.Set(technologies, tls, cache.DefaultExpiration)
-		return tls, nil
-	}
-	tls, ok := data.(*[]entities.Technology)
-	if !ok {
-		return nil, erw.New(erw.Internal(
-			erw.Location(pkg, technologies),
-			erw.Error(model.Errs[model.ErrConvertionCache]),
-		))
-	}
-	return tls, nil
+func (a *App) Technologies(ctx context.Context) ([]*entities.Technology, error) {
+	a.muTechnologies.RLock()
+	defer a.muTechnologies.RUnlock()
+	return a.technologies, nil
 }
 
 // Examples Репозиторий примеров.
-func (a *App) Examples(c context.Context) (*[]entities.Example, error) {
-	data, ok := a.cache.Get(examples)
-	if !ok {
-		query := fmt.Sprintf(
-			"select %s, %s, %s, %s from %s order by id",
-			"id", "name", "title", "description", examples,
-		)
-		rows, err := a.db.Query(c, query)
-		if err != nil {
-			return nil, erw.New(erw.Internal(
-				erw.Location(pkg, examples),
-				erw.Error(err),
-				erw.SQL(query),
-			))
-		}
-		cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Example])
-		if err != nil {
-			return nil, erw.New(erw.Internal(
-				erw.Location(pkg, examples),
-				erw.Error(err),
-				erw.SQL(query),
-			))
-		}
-		exs := new([]entities.Example)
-		for _, cl := range cls {
-			lks, err := a.exampleLinks(c, cl.Id)
-			if err != nil {
-				return nil, err
-			}
-			tks, err := a.exampleTechnologies(c, cl.Id)
-			if err != nil {
-				return nil, err
-			}
-			srs, err := a.exampleSources(c, cl.Id)
-			if err != nil {
-				return nil, err
-			}
-			ex := entities.Example{
-				Id:           cl.Id,
-				Name:         cl.Name,
-				Title:        cl.Title,
-				Description:  cl.Description,
-				Technologies: tks,
-				Sources:      srs,
-			}
-			if len(*lks) > 0 {
-				ex.Links = lks
-			}
-			*exs = append(*exs, ex)
-		}
-		// Установка кэша.
-		a.cache.Set(examples, exs, cache.DefaultExpiration)
-		return exs, nil
-	}
-	exs, ok := data.(*[]entities.Example)
-	if !ok {
-		return nil, erw.New(erw.Internal(
-			erw.Location(pkg, examples),
-			erw.Error(model.Errs[model.ErrConvertionCache]),
-		))
-	}
-	return exs, nil
-
+func (a *App) Examples(ctx context.Context) ([]*entities.Example, error) {
+	a.muExamples.RLock()
+	defer a.muExamples.RUnlock()
+	return a.examples, nil
 }
 
 // Software Репозиторий программ.
-func (a *App) Software(c context.Context) (*[]entities.Software, error) {
-	data, ok := a.cache.Get(software)
-	if !ok {
-		query := fmt.Sprintf(
-			"select %s, %s, %s from %s order by id",
-			"id", "title", "url", software,
-		)
-		rows, err := a.db.Query(c, query)
-		if err != nil {
-			return nil, erw.New(erw.Internal(
-				erw.Location(pkg, software),
-				erw.Error(err),
-				erw.SQL(query),
-			))
-		}
-		cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Software])
-		if err != nil {
-			return nil, erw.New(erw.Internal(
-				erw.Location(pkg, software),
-				erw.Error(err),
-				erw.SQL(query),
-			))
-		}
-		sfw := new([]entities.Software)
-		for _, cl := range cls {
-			*sfw = append(*sfw, entities.Software{
-				Id:    cl.Id,
-				Title: cl.Title,
-				Url:   cl.Url,
-			})
-		}
-		// Установка кэша.
-		a.cache.Set(software, sfw, cache.DefaultExpiration)
-		return sfw, nil
-	}
-	sfw, ok := data.(*[]entities.Software)
-	if !ok {
-		return nil, erw.New(erw.Internal(
-			erw.Location(pkg, software),
-			erw.Error(model.Errs[model.ErrConvertionCache]),
-		))
-	}
-	return sfw, nil
+func (a *App) Software(ctx context.Context) ([]*entities.Software, error) {
+	a.muSoftware.RLock()
+	defer a.muSoftware.RUnlock()
+	return a.software, nil
 }
 
 // Libs Репозиторий библиотек.
-func (a *App) Libs(c context.Context) (*[]entities.Lib, error) {
-	data, ok := a.cache.Get(libs)
-	if !ok {
-		query := fmt.Sprintf(
-			"select %s, %s from %s order by id",
-			"id", "url", libs,
-		)
-		rows, err := a.db.Query(c, query)
-		if err != nil {
-			return nil, erw.New(erw.Internal(
-				erw.Location(pkg, libs),
-				erw.Error(err),
-				erw.SQL(query),
-			))
-		}
-		cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Lib])
-		if err != nil {
-			return nil, erw.New(erw.Internal(
-				erw.Location(pkg, libs),
-				erw.Error(err),
-				erw.SQL(query),
-			))
-		}
-		lbs := new([]entities.Lib)
-		for _, cl := range cls {
-			*lbs = append(*lbs, entities.Lib{
-				Id:  cl.Id,
-				Url: cl.Url,
-			})
-		}
-		// Установка кэша.
-		a.cache.Set(libs, lbs, cache.DefaultExpiration)
-		return lbs, nil
-	}
-	lbs, ok := data.(*[]entities.Lib)
-	if !ok {
-		return nil, erw.New(erw.Internal(
-			erw.Location(pkg, libs),
-			erw.Error(model.Errs[model.ErrConvertionCache]),
-		))
-	}
-	return lbs, nil
+func (a *App) Libs(ctx context.Context) ([]*entities.Lib, error) {
+	a.muLibs.RLock()
+	defer a.muLibs.RUnlock()
+	return a.libs, nil
 }
 
 // Links Репозиторий ссылок.
-func (a *App) Links(c context.Context) (*[]entities.Link, error) {
-	data, ok := a.cache.Get(links)
-	if !ok {
-		query := fmt.Sprintf(
-			"select %s, %s, %s from %s order by id",
-			"id", "title", "url", "footer_links",
-		)
-		rows, err := a.db.Query(c, query)
-		if err != nil {
-			return nil, erw.New(erw.Internal(
-				erw.Location(pkg, links),
-				erw.Error(err),
-				erw.SQL(query),
-			))
-		}
-		cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Link])
-		if err != nil {
-			return nil, erw.New(erw.Internal(
-				erw.Location(pkg, links),
-				erw.Error(err),
-				erw.SQL(query),
-			))
-		}
-		lks := new([]entities.Link)
-		for _, cl := range cls {
-			*lks = append(*lks, entities.Link{
-				Id:    cl.Id,
-				Title: cl.Title,
-				Url:   cl.Url,
-			})
-		}
-		// Установка кэша.
-		a.cache.Set(links, lks, cache.DefaultExpiration)
-		return lks, nil
-	}
+func (a *App) Links(ctx context.Context) ([]*entities.Link, error) {
+	a.muLinks.RLock()
+	defer a.muLinks.RUnlock()
+	return a.links, nil
+}
 
-	lks, ok := data.(*[]entities.Link)
-	if !ok {
-		return nil, erw.New(erw.Internal(
-			erw.Location(pkg, links),
-			erw.Error(model.Errs[model.ErrConvertionCache]),
+// handler Система отслеживания ресурсов.
+func (a *App) handler(ctx context.Context) {
+	model.Logs.Info.Info("repository handler creating")
+	for {
+		select {
+		case <-a.exit:
+			// Завершение ресурса.
+			model.Logs.Info.Info("repository handler stopped")
+			a.source.Done()
+			return
+		case <-a.updateRunner.C:
+			// Запуск обновлений.
+			a.updateAll(ctx)
+		}
+	}
+}
+
+// updateAll Обновить все.
+func (a *App) updateAll(ctx context.Context) {
+	a.update.Add(6)
+	go a.updateTexts(ctx)
+	go a.updateTechnologies(ctx)
+	go a.updateExamples(ctx)
+	go a.updateSoftware(ctx)
+	go a.updateLibs(ctx)
+	go a.updateLinks(ctx)
+	a.update.Wait()
+	model.Logs.Info.Info("all updated")
+}
+
+// updateTexts Обновление текстов.
+func (a *App) updateTexts(ctx context.Context) {
+	const query = "select id, name, text from texts"
+	row, err := a.db.Query(ctx, query)
+	if err != nil {
+		model.Errors <- erw.New(erw.Internal(
+			erw.Location(pkg, text),
+			erw.Error(err),
+			erw.SQL(query),
 		))
 	}
-	return lks, nil
+	cls, err := pgx.CollectRows(row, pgx.RowToStructByName[Text])
+	if err != nil {
+		model.Errors <- erw.New(erw.Internal(
+			erw.Location(pkg, text),
+			erw.Error(err),
+			erw.SQL(query),
+		))
+	}
+	texts := make(map[string]*entities.Text)
+	for _, cl := range cls {
+		texts[cl.Name] = &entities.Text{
+			Id:   cl.Id,
+			Text: cl.Text,
+		}
+	}
+	a.muTexts.Lock()
+	a.texts = texts
+	a.muTexts.Unlock()
+	a.update.Done()
+}
+
+// updateTechnologies Обновление технологий.
+func (a *App) updateTechnologies(ctx context.Context) {
+	query := fmt.Sprintf(
+		"select %s, %s, %s from %s order by id",
+		"id", "title", "url", technologies,
+	)
+	rows, err := a.db.Query(ctx, query)
+	if err != nil {
+		model.Errors <- erw.New(erw.Internal(
+			erw.Location(pkg, technologies),
+			erw.Error(err),
+			erw.SQL(query),
+		))
+	}
+	cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Technology])
+	if err != nil {
+		model.Errors <- erw.New(erw.Internal(
+			erw.Location(pkg, technologies),
+			erw.Error(err),
+			erw.SQL(query),
+		))
+	}
+	tcs := []*entities.Technology{}
+	for _, cl := range cls {
+		tcs = append(tcs, &entities.Technology{
+			Id:    cl.Id,
+			Title: cl.Title,
+			Url:   cl.Url,
+		})
+	}
+	a.muTechnologies.Lock()
+	a.technologies = tcs
+	a.muTechnologies.Unlock()
+	a.update.Done()
+}
+
+// updateExamples Обновление примеров.
+func (a *App) updateExamples(ctx context.Context) {
+	query := fmt.Sprintf(
+		"select %s, %s, %s, %s from %s order by id",
+		"id", "name", "title", "description", examples,
+	)
+	rows, err := a.db.Query(ctx, query)
+	if err != nil {
+		model.Errors <- erw.New(erw.Internal(
+			erw.Location(pkg, examples),
+			erw.Error(err),
+			erw.SQL(query),
+		))
+	}
+	cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Example])
+	if err != nil {
+		model.Errors <- erw.New(erw.Internal(
+			erw.Location(pkg, examples),
+			erw.Error(err),
+			erw.SQL(query),
+		))
+	}
+	exs := []*entities.Example{}
+	for _, cl := range cls {
+		lks, err := a.exampleLinks(ctx, cl.Id)
+		if err != nil {
+			model.Errors <- err
+		}
+		tks, err := a.exampleTechnologies(ctx, cl.Id)
+		if err != nil {
+			model.Errors <- err
+		}
+		srs, err := a.exampleSources(ctx, cl.Id)
+		if err != nil {
+			model.Errors <- err
+		}
+		ex := &entities.Example{
+			Id:           cl.Id,
+			Name:         cl.Name,
+			Title:        cl.Title,
+			Description:  cl.Description,
+			Technologies: tks,
+			Sources:      srs,
+		}
+		if len(*lks) > 0 {
+			ex.Links = lks
+		}
+		exs = append(exs, ex)
+	}
+	a.muExamples.Lock()
+	a.examples = exs
+	a.muExamples.Unlock()
+	a.update.Done()
+}
+
+// updateSoftware Обновление программ.
+func (a *App) updateSoftware(ctx context.Context) {
+	query := fmt.Sprintf(
+		"select %s, %s, %s from %s order by id",
+		"id", "title", "url", software,
+	)
+	rows, err := a.db.Query(ctx, query)
+	if err != nil {
+		model.Errors <- erw.New(erw.Internal(
+			erw.Location(pkg, software),
+			erw.Error(err),
+			erw.SQL(query),
+		))
+	}
+	cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Software])
+	if err != nil {
+		model.Errors <- erw.New(erw.Internal(
+			erw.Location(pkg, software),
+			erw.Error(err),
+			erw.SQL(query),
+		))
+	}
+	sfw := []*entities.Software{}
+	for _, cl := range cls {
+		sfw = append(sfw, &entities.Software{
+			Id:    cl.Id,
+			Title: cl.Title,
+			Url:   cl.Url,
+		})
+	}
+	a.muSoftware.Lock()
+	a.software = sfw
+	a.muSoftware.Unlock()
+	a.update.Done()
+}
+
+// updateLibs Обновление библиотек.
+func (a *App) updateLibs(ctx context.Context) {
+	query := fmt.Sprintf(
+		"select %s, %s from %s order by id",
+		"id", "url", libs,
+	)
+	rows, err := a.db.Query(ctx, query)
+	if err != nil {
+		model.Errors <- erw.New(erw.Internal(
+			erw.Location(pkg, libs),
+			erw.Error(err),
+			erw.SQL(query),
+		))
+	}
+	cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Lib])
+	if err != nil {
+		model.Errors <- erw.New(erw.Internal(
+			erw.Location(pkg, libs),
+			erw.Error(err),
+			erw.SQL(query),
+		))
+	}
+	lbs := []*entities.Lib{}
+	for _, cl := range cls {
+		lbs = append(lbs, &entities.Lib{
+			Id:  cl.Id,
+			Url: cl.Url,
+		})
+	}
+	a.muLibs.Lock()
+	a.libs = lbs
+	a.muLibs.Unlock()
+	a.update.Done()
+}
+
+// updateLinks Основление ссылок.
+func (a *App) updateLinks(ctx context.Context) {
+	query := fmt.Sprintf(
+		"select %s, %s, %s from %s order by id",
+		"id", "title", "url", "footer_links",
+	)
+	rows, err := a.db.Query(ctx, query)
+	if err != nil {
+		model.Errors <- erw.New(erw.Internal(
+			erw.Location(pkg, links),
+			erw.Error(err),
+			erw.SQL(query),
+		))
+	}
+	cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Link])
+	if err != nil {
+		model.Errors <- erw.New(erw.Internal(
+			erw.Location(pkg, links),
+			erw.Error(err),
+			erw.SQL(query),
+		))
+	}
+	lks := []*entities.Link{}
+	for _, cl := range cls {
+		lks = append(lks, &entities.Link{
+			Id:    cl.Id,
+			Title: cl.Title,
+			Url:   cl.Url,
+		})
+	}
+	a.muLinks.Lock()
+	a.links = lks
+	a.muLinks.Unlock()
+	a.update.Done()
 }
 
 // exampleLinks Ссылки примера.
-func (a *App) exampleLinks(c context.Context, exampleID uuid.UUID) (*[]entities.Link, error) {
+func (a *App) exampleLinks(ctx context.Context, exampleID uuid.UUID) (*[]entities.Link, error) {
 	query := fmt.Sprintf(`SELECT %s, %s, %s
 			FROM %s
 			LEFT JOIN %s
@@ -397,7 +439,7 @@ func (a *App) exampleLinks(c context.Context, exampleID uuid.UUID) (*[]entities.
 		"examples_links.link_id", "links.id",
 		"example_id",
 	)
-	rows, err := a.db.Query(c, query, exampleID)
+	rows, err := a.db.Query(ctx, query, exampleID)
 	if err != nil {
 		return nil, erw.New(erw.Internal(
 			erw.Location(pkg, examples, links),
@@ -425,7 +467,7 @@ func (a *App) exampleLinks(c context.Context, exampleID uuid.UUID) (*[]entities.
 }
 
 // exampleTechnologies Технологии примера.
-func (a *App) exampleTechnologies(c context.Context, exampleID uuid.UUID) (*[]entities.Technology, error) {
+func (a *App) exampleTechnologies(ctx context.Context, exampleID uuid.UUID) (*[]entities.Technology, error) {
 	query := fmt.Sprintf(`SELECT %s, %s, %s
 			FROM %s
 			LEFT JOIN %s
@@ -436,7 +478,7 @@ func (a *App) exampleTechnologies(c context.Context, exampleID uuid.UUID) (*[]en
 		"examples_technologies.technology_id", "technologies.id",
 		"example_id",
 	)
-	rows, err := a.db.Query(c, query, exampleID)
+	rows, err := a.db.Query(ctx, query, exampleID)
 	if err != nil {
 		return nil, erw.New(erw.Internal(
 			erw.Location(pkg, examples, technologies),
@@ -464,7 +506,7 @@ func (a *App) exampleTechnologies(c context.Context, exampleID uuid.UUID) (*[]en
 }
 
 // exampleSources Исходники примера.
-func (a *App) exampleSources(c context.Context, exampleID uuid.UUID) (*[]entities.Source, error) {
+func (a *App) exampleSources(ctx context.Context, exampleID uuid.UUID) (*[]entities.Source, error) {
 	query := fmt.Sprintf(`SELECT %s, %s
 			FROM %s
 			LEFT JOIN %s
@@ -475,7 +517,7 @@ func (a *App) exampleSources(c context.Context, exampleID uuid.UUID) (*[]entitie
 		"examples_sources.source_id", "sources.id",
 		"example_id",
 	)
-	rows, err := a.db.Query(c, query, exampleID)
+	rows, err := a.db.Query(ctx, query, exampleID)
 	if err != nil {
 		return nil, erw.New(erw.Internal(
 			erw.Location(pkg, examples, sources),
