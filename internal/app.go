@@ -105,6 +105,9 @@ func (a *App) errorHanle() error {
 
 // stop Остановка приложения.
 func (a *App) stop() error {
+	// Отмена контекста.
+	a.cancel()
+	model.Logs.Info.Info("context canceled")
 	// Остановка транспортного слоя из которо по цепочке
 	// останавливаются все остальные слои.
 	if err := a.delivery.Stop(a.ctx); err != nil {
@@ -114,8 +117,6 @@ func (a *App) stop() error {
 	a.source.Wait()
 	// Закрытие канала отслеживающего сигналы операционной системы.
 	close(a.exit)
-	// Отмена контекста.
-	a.cancel()
 	model.Logs.Info.Info(fmt.Sprintf("%s stopped", model.APP_NAME))
 	return nil
 }
