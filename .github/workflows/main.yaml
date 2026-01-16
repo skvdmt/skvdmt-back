@@ -56,6 +56,7 @@ jobs:
              --no-cache \
              --tag ${{ github.repository }} .
             docker push ${{ github.repository }}
+            docker restart ${{ secrets.DOCKER_BUILDX_CONTAINER_NAME }}
           EOF
       - name: Remove sources.
         if: success() || failure()
