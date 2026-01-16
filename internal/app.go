@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -10,6 +11,10 @@ import (
 
 	"github.com/skvdmt/skvdmt-back/internal/delivery"
 	"github.com/skvdmt/skvdmt-back/internal/model"
+)
+
+const (
+	ErrPostgresContextCanceled = "pq: canceling statement due to user request"
 )
 
 // App Основная структура приложения.
@@ -65,6 +70,8 @@ func (a *App) Start() error {
 		var err error
 		if err = a.delivery.Start(a.ctx); err != nil {
 			model.Errors <- err
+			a.source.Done()
+			return
 		}
 		// Завершение работы ресурса приложения.
 		a.source.Done()
@@ -83,7 +90,15 @@ func (a *App) signalHandle() {
 
 // errorHandle Обработка канала ошибок.
 func (a *App) errorHanle() error {
-	err := <-model.Errors
+	var err error
+	for {
+		err = <-model.Errors
+		// Игнорирование обработки ошибки отмены контекста postgres.
+		if !errors.Is(err, errors.New(ErrPostgresContextCanceled)) {
+			continue
+		}
+		break
+	}
 	close(model.Errors)
 	return err
 }

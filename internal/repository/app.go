@@ -207,6 +207,8 @@ func (a *App) updateTexts(ctx context.Context) {
 			erw.Error(err),
 			erw.SQL(query),
 		))
+		a.update.Done()
+		return
 	}
 	cls, err := pgx.CollectRows(row, pgx.RowToStructByName[Text])
 	if err != nil {
@@ -215,6 +217,8 @@ func (a *App) updateTexts(ctx context.Context) {
 			erw.Error(err),
 			erw.SQL(query),
 		))
+		a.update.Done()
+		return
 	}
 	texts := make(map[string]*entities.Text)
 	for _, cl := range cls {
@@ -242,6 +246,8 @@ func (a *App) updateTechnologies(ctx context.Context) {
 			erw.Error(err),
 			erw.SQL(query),
 		))
+		a.update.Done()
+		return
 	}
 	cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Technology])
 	if err != nil {
@@ -250,6 +256,8 @@ func (a *App) updateTechnologies(ctx context.Context) {
 			erw.Error(err),
 			erw.SQL(query),
 		))
+		a.update.Done()
+		return
 	}
 	tcs := []*entities.Technology{}
 	for _, cl := range cls {
@@ -278,6 +286,8 @@ func (a *App) updateExamples(ctx context.Context) {
 			erw.Error(err),
 			erw.SQL(query),
 		))
+		a.update.Done()
+		return
 	}
 	cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Example])
 	if err != nil {
@@ -286,20 +296,28 @@ func (a *App) updateExamples(ctx context.Context) {
 			erw.Error(err),
 			erw.SQL(query),
 		))
+		a.update.Done()
+		return
 	}
 	exs := []*entities.Example{}
 	for _, cl := range cls {
 		lks, err := a.exampleLinks(ctx, cl.Id)
 		if err != nil {
 			model.Errors <- err
+			a.update.Done()
+			return
 		}
 		tks, err := a.exampleTechnologies(ctx, cl.Id)
 		if err != nil {
 			model.Errors <- err
+			a.update.Done()
+			return
 		}
 		srs, err := a.exampleSources(ctx, cl.Id)
 		if err != nil {
 			model.Errors <- err
+			a.update.Done()
+			return
 		}
 		ex := &entities.Example{
 			Id:           cl.Id,
@@ -333,6 +351,8 @@ func (a *App) updateSoftware(ctx context.Context) {
 			erw.Error(err),
 			erw.SQL(query),
 		))
+		a.update.Done()
+		return
 	}
 	cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Software])
 	if err != nil {
@@ -341,6 +361,8 @@ func (a *App) updateSoftware(ctx context.Context) {
 			erw.Error(err),
 			erw.SQL(query),
 		))
+		a.update.Done()
+		return
 	}
 	sfw := []*entities.Software{}
 	for _, cl := range cls {
@@ -369,6 +391,8 @@ func (a *App) updateLibs(ctx context.Context) {
 			erw.Error(err),
 			erw.SQL(query),
 		))
+		a.update.Done()
+		return
 	}
 	cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Lib])
 	if err != nil {
@@ -377,6 +401,8 @@ func (a *App) updateLibs(ctx context.Context) {
 			erw.Error(err),
 			erw.SQL(query),
 		))
+		a.update.Done()
+		return
 	}
 	lbs := []*entities.Lib{}
 	for _, cl := range cls {
@@ -404,6 +430,8 @@ func (a *App) updateLinks(ctx context.Context) {
 			erw.Error(err),
 			erw.SQL(query),
 		))
+		a.update.Done()
+		return
 	}
 	cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Link])
 	if err != nil {
@@ -412,6 +440,8 @@ func (a *App) updateLinks(ctx context.Context) {
 			erw.Error(err),
 			erw.SQL(query),
 		))
+		a.update.Done()
+		return
 	}
 	lks := []*entities.Link{}
 	for _, cl := range cls {
