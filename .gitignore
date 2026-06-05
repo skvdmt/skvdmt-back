@@ -4,4 +4,3 @@ docker-compose.yaml
 swagger.yaml
 Makefile
 logs
-.idea
