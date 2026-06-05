@@ -1,6 +1,6 @@
 server:
   port: 8000
-  base_url: ""
+  base_url: "/api/v1"
 postgres:
   host: postgres
   port: 5432
