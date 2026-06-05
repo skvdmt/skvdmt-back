@@ -91,12 +91,12 @@ jobs:
       - name: Stop application container.
         run: |
           ssh -i ~/.ssh/github_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} <<EOF
-            docker stop skvdmt-back || true
+            docker stop ${{ github.event.repository.name }} || true
           EOF
       - name: Remove application container.
         run: |
           ssh -i ~/.ssh/github_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} <<EOF
-            docker rm skvdmt-back || true
+            docker rm ${{ github.event.repository.name }} || true
           EOF
       - name: Creating and runnig application container.
         run: |
@@ -107,7 +107,6 @@ jobs:
               --env DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD_URL_ENCODE }} \
               --volume ${{ secrets.HOME }}/logs/${{ github.event.repository.name }}:/var/log/${{ github.event.repository.name }} \
               --restart unless-stopped \
-              --stop-timeout -1 \
               ${{ github.repository }}
           EOF
       - name: Remove SSH key files.
