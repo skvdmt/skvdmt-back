@@ -27,6 +27,12 @@ func NewApp(ctx context.Context) (*App, error) {
 	}, nil
 }
 
+// Start Запуск.
+func (a *App) Start(ctx context.Context) error {
+	model.Logs.Info.Info("usecase layer starting")
+	return a.repository.Start(ctx)
+}
+
 // Stop Остановка.
 func (a *App) Stop(ctx context.Context) error {
 	// Остановка репозиторного слоя.

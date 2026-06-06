@@ -1,0 +1,8 @@
+server:
+  port: 8000
+  base_url: ""
+postgres:
+  host: localhost
+  port: 5432
+  user: dima
+  database: skvdmt-back

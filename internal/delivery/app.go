@@ -3,11 +3,8 @@ package delivery
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
-	"path"
-	"time"
 
 	"github.com/skvdmt/skvdmt-back/internal/model"
 	"github.com/skvdmt/skvdmt-back/internal/usecase"
@@ -15,25 +12,12 @@ import (
 )
 
 const (
-	defaultTimeout        = 10
-	defaultMaxHeaderBytes = 1 << 20 // 1Mb
-
 	pkg = "delivery"
 	app = "app"
-
-	get              = "GET %s"
-	url_text         = "/text/{id}"
-	url_technologies = "/technologies"
-	url_examples     = "/examples"
-	url_software     = "/software"
-	url_libs         = "/libs"
-	url_links        = "/links"
 )
 
 // App Транспортный слой.
 type App struct {
-	router  *http.ServeMux
-	server  *http.Server
 	usecase Usecase
 }
 
@@ -45,58 +29,24 @@ func NewApp(ctx context.Context) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Создание сервера.
-	r := http.NewServeMux()
 	return &App{
 		usecase: uc,
-		router:  r,
-		server: &http.Server{
-			Addr:           fmt.Sprintf(":%d", model.Config.Server.Port),
-			Handler:        r,
-			ReadTimeout:    defaultTimeout * time.Second,
-			WriteTimeout:   defaultTimeout * time.Second,
-			MaxHeaderBytes: defaultMaxHeaderBytes,
-		},
 	}, nil
+}
+
+// Start Запуск.
+func (a *App) Start(ctx context.Context) error {
+	model.Logs.Info.Info("delivery layer starting")
+	return a.usecase.Start(ctx)
 }
 
 // Stop Остановка транспортного слоя.
 func (a *App) Stop(ctx context.Context) error {
-	// Остановка сервера.
-	if err := a.server.Shutdown(ctx); err != nil {
-		return err
-	}
-	model.Logs.Info.Info("http server shutdown")
 	// Остановка сервисного слоя.
 	if err := a.usecase.Stop(ctx); err != nil {
 		return err
 	}
 	model.Logs.Info.Info("delivery layer stopped")
-	return nil
-}
-
-// Start Запуск транспортного слоя.
-func (a *App) Start(ctx context.Context) error {
-	model.Logs.Info.Info("delivery layer starting")
-	a.routes()
-	model.Logs.Info.Info(fmt.Sprintf("http server starting on %d port",
-		model.Config.Server.Port))
-	if err := a.server.ListenAndServe(); err != nil &&
-		!errors.Is(err, http.ErrServerClosed) {
-		return err
-	}
-	return nil
-}
-
-// routes Настройка маршрутов.
-func (a *App) routes() error {
-	bu := model.Config.Server.BaseUrl
-	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_text)), a.Text)
-	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_technologies)), a.Technologies)
-	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_examples)), a.Examples)
-	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_software)), a.Software)
-	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_libs)), a.Libs)
-	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_links)), a.Links)
 	return nil
 }
 

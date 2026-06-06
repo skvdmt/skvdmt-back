@@ -37,21 +37,24 @@ type App struct {
 	muSoftware     *sync.RWMutex
 	muLinks        *sync.RWMutex
 	muLibs         *sync.RWMutex
-	updateRunner   *time.Ticker
-	exit           chan struct{}
-	update         *sync.WaitGroup
-	source         *sync.WaitGroup
-	texts          map[string]*entities.Text
-	technologies   []*entities.Technology
-	examples       []*entities.Example
-	software       []*entities.Software
-	links          []*entities.Link
-	libs           []*entities.Lib
+
+	updateRunner *time.Ticker
+	updateClose  chan struct{}
+	update       *sync.WaitGroup
+
+	sources *sync.WaitGroup
+
+	texts        map[string]*entities.Text
+	technologies []*entities.Technology
+	examples     []*entities.Example
+	software     []*entities.Software
+	links        []*entities.Link
+	libs         []*entities.Lib
 }
 
 const (
 	postgres    = "postgres"
-	DB_PASSWORD = "DB_PASSWORD"
+	DB_PASSWORD = "POSTGRES_PASSWORD"
 )
 
 // NewApp Конструктор.
@@ -83,10 +86,9 @@ func NewApp(ctx context.Context) (*App, error) {
 	a := &App{
 		db:             dbpool,
 		texts:          make(map[string]*entities.Text),
-		exit:           make(chan struct{}),
-		updateRunner:   time.NewTicker(time.Minute * updateInterval),
+		updateClose:    make(chan struct{}),
 		update:         &sync.WaitGroup{},
-		source:         &sync.WaitGroup{},
+		sources:        &sync.WaitGroup{},
 		muTexts:        &sync.RWMutex{},
 		muTechnologies: &sync.RWMutex{},
 		muExamples:     &sync.RWMutex{},
@@ -94,21 +96,27 @@ func NewApp(ctx context.Context) (*App, error) {
 		muLinks:        &sync.RWMutex{},
 		muLibs:         &sync.RWMutex{},
 	}
-	// Первый запуск обновлений.
+	return a, nil
+}
+
+// Start Запуск.
+func (a *App) Start(ctx context.Context) error {
+	model.Logs.Info.Info("repository layer starting")
+	// Первичный запуск обновлений.
 	a.updateAll(ctx)
 
 	// Запуск ресурса.
-	a.source.Add(1)
-	go a.handler(ctx)
-	return a, nil
+	a.sources.Add(1)
+	go a.updateHandler(ctx)
+	return nil
 }
 
 // Stop Остановка.
 func (a *App) Stop(ctx context.Context) error {
-	// Отправляем сигнал завершения.
-	a.exit <- struct{}{}
+	// Отправляем сигнал завершения обработки обновлений.
+	a.updateClose <- struct{}{}
 	// Ожидание завершения всех ресурсов.
-	a.source.Wait()
+	a.sources.Wait()
 	// Закрытие соединения с базой данных.
 	a.db.Close()
 	model.Logs.Info.Info("database connection closed")
@@ -167,15 +175,16 @@ func (a *App) Links(ctx context.Context) ([]*entities.Link, error) {
 	return a.links, nil
 }
 
-// handler Система отслеживания ресурсов.
-func (a *App) handler(ctx context.Context) {
+// updateHandler Обработчик обновления данных.
+func (a *App) updateHandler(ctx context.Context) {
 	model.Logs.Info.Info("repository handler creating")
+	a.updateRunner = time.NewTicker(time.Minute * updateInterval)
 	for {
 		select {
-		case <-a.exit:
+		case <-a.updateClose:
 			// Завершение ресурса.
 			model.Logs.Info.Info("repository handler stopped")
-			a.source.Done()
+			a.sources.Done()
 			return
 		case <-a.updateRunner.C:
 			// Запуск обновлений.
@@ -202,21 +211,13 @@ func (a *App) updateTexts(ctx context.Context) {
 	const query = "select id, name, text from texts"
 	row, err := a.db.Query(ctx, query)
 	if err != nil {
-		model.Errors <- erw.New(erw.Internal(
-			erw.Location(pkg, text),
-			erw.Error(err),
-			erw.SQL(query),
-		))
+		model.Errors <- err
 		a.update.Done()
 		return
 	}
 	cls, err := pgx.CollectRows(row, pgx.RowToStructByName[Text])
 	if err != nil {
-		model.Errors <- erw.New(erw.Internal(
-			erw.Location(pkg, text),
-			erw.Error(err),
-			erw.SQL(query),
-		))
+		model.Errors <- err
 		a.update.Done()
 		return
 	}
@@ -241,21 +242,13 @@ func (a *App) updateTechnologies(ctx context.Context) {
 	)
 	rows, err := a.db.Query(ctx, query)
 	if err != nil {
-		model.Errors <- erw.New(erw.Internal(
-			erw.Location(pkg, technologies),
-			erw.Error(err),
-			erw.SQL(query),
-		))
+		model.Errors <- err
 		a.update.Done()
 		return
 	}
 	cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Technology])
 	if err != nil {
-		model.Errors <- erw.New(erw.Internal(
-			erw.Location(pkg, technologies),
-			erw.Error(err),
-			erw.SQL(query),
-		))
+		model.Errors <- err
 		a.update.Done()
 		return
 	}
@@ -281,21 +274,13 @@ func (a *App) updateExamples(ctx context.Context) {
 	)
 	rows, err := a.db.Query(ctx, query)
 	if err != nil {
-		model.Errors <- erw.New(erw.Internal(
-			erw.Location(pkg, examples),
-			erw.Error(err),
-			erw.SQL(query),
-		))
+		model.Errors <- err
 		a.update.Done()
 		return
 	}
 	cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Example])
 	if err != nil {
-		model.Errors <- erw.New(erw.Internal(
-			erw.Location(pkg, examples),
-			erw.Error(err),
-			erw.SQL(query),
-		))
+		model.Errors <- err
 		a.update.Done()
 		return
 	}
@@ -346,21 +331,13 @@ func (a *App) updateSoftware(ctx context.Context) {
 	)
 	rows, err := a.db.Query(ctx, query)
 	if err != nil {
-		model.Errors <- erw.New(erw.Internal(
-			erw.Location(pkg, software),
-			erw.Error(err),
-			erw.SQL(query),
-		))
+		model.Errors <- err
 		a.update.Done()
 		return
 	}
 	cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Software])
 	if err != nil {
-		model.Errors <- erw.New(erw.Internal(
-			erw.Location(pkg, software),
-			erw.Error(err),
-			erw.SQL(query),
-		))
+		model.Errors <- err
 		a.update.Done()
 		return
 	}
@@ -386,21 +363,13 @@ func (a *App) updateLibs(ctx context.Context) {
 	)
 	rows, err := a.db.Query(ctx, query)
 	if err != nil {
-		model.Errors <- erw.New(erw.Internal(
-			erw.Location(pkg, libs),
-			erw.Error(err),
-			erw.SQL(query),
-		))
+		model.Errors <- err
 		a.update.Done()
 		return
 	}
 	cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Lib])
 	if err != nil {
-		model.Errors <- erw.New(erw.Internal(
-			erw.Location(pkg, libs),
-			erw.Error(err),
-			erw.SQL(query),
-		))
+		model.Errors <- err
 		a.update.Done()
 		return
 	}
@@ -425,21 +394,13 @@ func (a *App) updateLinks(ctx context.Context) {
 	)
 	rows, err := a.db.Query(ctx, query)
 	if err != nil {
-		model.Errors <- erw.New(erw.Internal(
-			erw.Location(pkg, links),
-			erw.Error(err),
-			erw.SQL(query),
-		))
+		model.Errors <- err
 		a.update.Done()
 		return
 	}
 	cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Link])
 	if err != nil {
-		model.Errors <- erw.New(erw.Internal(
-			erw.Location(pkg, links),
-			erw.Error(err),
-			erw.SQL(query),
-		))
+		model.Errors <- err
 		a.update.Done()
 		return
 	}
@@ -471,19 +432,11 @@ func (a *App) exampleLinks(ctx context.Context, exampleID uuid.UUID) (*[]entitie
 	)
 	rows, err := a.db.Query(ctx, query, exampleID)
 	if err != nil {
-		return nil, erw.New(erw.Internal(
-			erw.Location(pkg, examples, links),
-			erw.Error(err),
-			erw.SQL(query, exampleID),
-		))
+		return nil, err
 	}
 	cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Link])
 	if err != nil {
-		return nil, erw.New(erw.Internal(
-			erw.Location(pkg, examples, links),
-			erw.Error(err),
-			erw.SQL(query, exampleID),
-		))
+		return nil, err
 	}
 	lks := new([]entities.Link)
 	for _, cl := range cls {
@@ -510,19 +463,11 @@ func (a *App) exampleTechnologies(ctx context.Context, exampleID uuid.UUID) (*[]
 	)
 	rows, err := a.db.Query(ctx, query, exampleID)
 	if err != nil {
-		return nil, erw.New(erw.Internal(
-			erw.Location(pkg, examples, technologies),
-			erw.Error(err),
-			erw.SQL(query, exampleID),
-		))
+		return nil, err
 	}
 	cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Technology])
 	if err != nil {
-		return nil, erw.New(erw.Internal(
-			erw.Location(pkg, examples, technologies),
-			erw.Error(err),
-			erw.SQL(query, exampleID),
-		))
+		return nil, err
 	}
 	tks := new([]entities.Technology)
 	for _, cl := range cls {
@@ -549,11 +494,7 @@ func (a *App) exampleSources(ctx context.Context, exampleID uuid.UUID) (*[]entit
 	)
 	rows, err := a.db.Query(ctx, query, exampleID)
 	if err != nil {
-		return nil, erw.New(erw.Internal(
-			erw.Location(pkg, examples, sources),
-			erw.Error(err),
-			erw.SQL(query, exampleID),
-		))
+		return nil, err
 	}
 	cls, err := pgx.CollectRows(rows, pgx.RowToStructByName[Source])
 	if err != nil {
