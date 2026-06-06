@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -48,7 +49,7 @@ var requests = []request{
 	},
 	{
 		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
-		args:  []any{"abou", "Dmitry Skidanov — full stack engineer 2026"},
+		args:  []any{"abou", fmt.Sprintf("Dmitry Skidanov — full stack engineer %d", time.Now().Year())},
 	},
 	{
 		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
@@ -74,7 +75,7 @@ var requests = []request{
 	},
 	{
 		query: `INSERT INTO software(title, url) VALUES($1, $2);`,
-		args:  []any{"Postman", "https://www.postman.com/"},
+		args:  []any{"Insomnia", "https://insomnia.rest/"},
 	},
 	{
 		query: `INSERT INTO software(title, url) VALUES($1, $2);`,
@@ -93,10 +94,6 @@ var requests = []request{
 	{
 		query: `INSERT INTO libs(url) VALUES($1);`,
 		args:  []any{"https://github.com/grpc/grpc-go"},
-	},
-	{
-		query: `INSERT INTO libs(url) VALUES($1);`,
-		args:  []any{"https://github.com/patrickmn/go-cache"},
 	},
 	{
 		query: `INSERT INTO libs(url) VALUES($1);`,
@@ -165,11 +162,11 @@ var links = []request{
 	},
 	{
 		query: `INSERT INTO links(title, url) VALUES($1, $2) RETURNING id;`,
-		args:  []any{"open telegram bot", "https://t.me/skdmtr_bot"},
+		args:  []any{"open telegram bot", "https://t.me/skidanovdima_msgs_bot"},
 	},
 	{
 		query: `INSERT INTO links(title, url) VALUES($1, $2) RETURNING id;`,
-		args:  []any{"view messages", "https://tgbot.skvdmt.ru/messages"},
+		args:  []any{"view messages", "https://msgs.skvdmt.ru/"},
 	},
 }
 
@@ -204,10 +201,6 @@ var technologies = []request{
 	},
 	{
 		query: `INSERT INTO technologies (title, url) VALUES($1, $2) RETURNING id;`,
-		args:  []any{"TypeScript", "https://www.typescriptlang.org/"},
-	},
-	{
-		query: `INSERT INTO technologies (title, url) VALUES($1, $2) RETURNING id;`,
 		args:  []any{"JavaScript", "https://developer.mozilla.org/en-US/docs/Web/JavaScript"},
 	},
 	{
@@ -219,31 +212,31 @@ var technologies = []request{
 var sources = []request{
 	{
 		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
-		args:  []any{"https://github.com/skvdmt/chess-front"},
-	},
-	{
-		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
 		args:  []any{"https://github.com/skvdmt/chess-back-game"},
 	},
 	{
 		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
-		args:  []any{"https://github.com/skvdmt/tgbot-front-messages"},
+		args:  []any{"https://github.com/skvdmt/chess-front"},
 	},
 	{
 		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
-		args:  []any{"https://github.com/skvdmt/tgbot-back-messages"},
+		args:  []any{"https://github.com/skvdmt/skvdmt-tgbot-msgs"},
 	},
 	{
 		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
-		args:  []any{"https://github.com/skvdmt/tgbot-back-app"},
+		args:  []any{"https://github.com/skvdmt/skvdmt-msgs-back"},
 	},
 	{
 		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
-		args:  []any{"https://github.com/skvdmt/skvdmt-front"},
+		args:  []any{"https://github.com/skvdmt/msgs-skvdmt-front"},
 	},
 	{
 		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
 		args:  []any{"https://github.com/skvdmt/skvdmt-back"},
+	},
+	{
+		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
+		args:  []any{"https://github.com/skvdmt/skvdmt-front"},
 	},
 }
 
