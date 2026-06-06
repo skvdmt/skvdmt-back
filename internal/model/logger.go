@@ -10,7 +10,7 @@ import (
 
 const (
 	MODE = "MODE"
-	dev  = "dev"
+	Dev  = "dev"
 	// Путь к директории журналов. (Добавляется директория с именем приложения).
 	logDirectoryProd = "/var/log"
 	logDirectoryDev  = "./logs"
@@ -48,7 +48,7 @@ func LoadLogger() error {
 	// Установка директории файлов журнала.
 	logDirectory := logDirectoryProd
 	mode, ok := os.LookupEnv(MODE)
-	if ok && mode == dev {
+	if ok && mode == Dev {
 		logDirectory = logDirectoryDev
 	}
 	n := "models.logger.Loadlogger"

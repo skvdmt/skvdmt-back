@@ -53,17 +53,23 @@ type App struct {
 }
 
 const (
-	postgres    = "postgres"
-	DB_PASSWORD = "POSTGRES_PASSWORD"
+	postgres          = "postgres"
+	DB_PASSWORD       = "DB_PASSWORD"
+	POSTGRES_PASSWORD = "POSTGRES_PASSWORD"
 )
 
 // NewApp Конструктор.
 func NewApp(ctx context.Context) (*App, error) {
 	model.Logs.Info.Info("repository layer creating")
 	model.Logs.Info.Info("database connection creating")
-	pwd, ok := os.LookupEnv(DB_PASSWORD)
+	penv := DB_PASSWORD
+	mode, ok := os.LookupEnv(model.MODE)
+	if ok && mode == model.Dev {
+		penv = POSTGRES_PASSWORD
+	}
+	pwd, ok := os.LookupEnv(penv)
 	if !ok {
-		return nil, fmt.Errorf("env %s unset", DB_PASSWORD)
+		return nil, fmt.Errorf("env %s unset", penv)
 	}
 	q := fmt.Sprintf(
 		"%s://%s:%s@%s:%d/%s",

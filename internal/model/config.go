@@ -48,7 +48,7 @@ func LoadConfig() error {
 	configDirectory := configDirectoryProd
 	configFileName := configFileNameProd
 	mode, ok := os.LookupEnv(MODE)
-	if ok && mode == dev {
+	if ok && mode == Dev {
 		configDirectory = configDirectoryDev
 		configFileName = configFileNameDev
 	}
