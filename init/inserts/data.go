@@ -224,10 +224,6 @@ var sources = []request{
 	},
 	{
 		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
-		args:  []any{"https://github.com/skvdmt/skvdmt-msgs-back"},
-	},
-	{
-		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
 		args:  []any{"https://github.com/skvdmt/msgs-skvdmt-front"},
 	},
 	{
@@ -282,9 +278,8 @@ func InsertData(db *pgxpool.Pool) {
 	createLinks(db, "examples_sources", "source_id", 1, 2)
 	createLinks(db, "examples_sources", "source_id", 2, 3)
 	createLinks(db, "examples_sources", "source_id", 2, 4)
-	createLinks(db, "examples_sources", "source_id", 2, 5)
+	createLinks(db, "examples_sources", "source_id", 3, 5)
 	createLinks(db, "examples_sources", "source_id", 3, 6)
-	createLinks(db, "examples_sources", "source_id", 3, 7)
 }
 
 // insertDataSetID remember returning id after inserting data
