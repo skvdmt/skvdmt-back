@@ -92,7 +92,7 @@ func NewApp(ctx context.Context) (*App, error) {
 	a := &App{
 		db:             dbpool,
 		texts:          make(map[string]*entities.Text),
-		updateClose:    make(chan struct{}),
+		updateClose:    make(chan struct{}, 1),
 		update:         &sync.WaitGroup{},
 		sources:        &sync.WaitGroup{},
 		muTexts:        &sync.RWMutex{},
@@ -120,7 +120,7 @@ func (a *App) Start(ctx context.Context) error {
 // Stop Остановка.
 func (a *App) Stop(ctx context.Context) error {
 	// Отправляем сигнал завершения обработки обновлений.
-	a.updateClose <- struct{}{}
+	close(a.updateClose)
 	// Ожидание завершения всех ресурсов.
 	a.sources.Wait()
 	// Закрытие соединения с базой данных.
@@ -183,6 +183,7 @@ func (a *App) Links(ctx context.Context) ([]*entities.Link, error) {
 
 // updateHandler Обработчик обновления данных.
 func (a *App) updateHandler(ctx context.Context) {
+	defer a.sources.Done()
 	model.Logs.Info.Info("repository handler creating")
 	a.updateRunner = time.NewTicker(time.Minute * updateInterval)
 	for {
@@ -190,7 +191,6 @@ func (a *App) updateHandler(ctx context.Context) {
 		case <-a.updateClose:
 			// Завершение ресурса.
 			model.Logs.Info.Info("repository handler stopped")
-			a.sources.Done()
 			return
 		case <-a.updateRunner.C:
 			// Запуск обновлений.
