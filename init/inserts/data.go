@@ -75,7 +75,7 @@ var requests = []request{
 	},
 	{
 		query: `INSERT INTO software(title, url) VALUES($1, $2);`,
-		args:  []any{"Insomnia", "https://insomnia.rest/"},
+		args:  []any{"Bruno", "https://www.usebruno.com/"},
 	},
 	{
 		query: `INSERT INTO software(title, url) VALUES($1, $2);`,
