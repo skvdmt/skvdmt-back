@@ -275,7 +275,7 @@ func (a *App) updateTechnologies(ctx context.Context) {
 // updateExamples Обновление примеров.
 func (a *App) updateExamples(ctx context.Context) {
 	query := fmt.Sprintf(
-		"select %s, %s, %s, %s from %s order by id",
+		"select %s, %s, %s, %s from %s order by id desc",
 		"id", "name", "title", "description", examples,
 	)
 	rows, err := a.db.Query(ctx, query)
