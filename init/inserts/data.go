@@ -181,7 +181,7 @@ var links = []request{
 	},
 	{
 		query: `INSERT INTO links(title, url) VALUES($1, $2) RETURNING id;`,
-		args:  []any{"play", "https://secret.skvdmt.ru/"},
+		args:  []any{"try auth", "https://secret.skvdmt.ru/"},
 	},
 }
 
