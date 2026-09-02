@@ -164,6 +164,14 @@ The jwt library is used to create and validate tokens.
 Enter username "dima" and password "password" to log in.`,
 		},
 	},
+	{
+		query: `INSERT INTO examples (name, title, description) VALUES($1, $2, $3) RETURNING id;`,
+		args: []any{
+			"jwt",
+			"JSON Web Tokens",
+			`Library for generating and validating JSON Web Tokens.`,
+		},
+	},
 }
 
 var links = []request{
@@ -318,6 +326,7 @@ func InsertData(db *pgxpool.Pool) {
 	createLinks(db, "examples_technologies", "technology_id", 4, 7)
 	createLinks(db, "examples_technologies", "technology_id", 4, 8)
 	createLinks(db, "examples_technologies", "technology_id", 4, 9)
+	createLinks(db, "examples_technologies", "technology_id", 5, 1)
 
 	createLinks(db, "examples_sources", "source_id", 1, 1)
 	createLinks(db, "examples_sources", "source_id", 1, 2)
@@ -330,6 +339,7 @@ func InsertData(db *pgxpool.Pool) {
 	createLinks(db, "examples_sources", "source_id", 4, 9)
 	createLinks(db, "examples_sources", "source_id", 4, 10)
 	createLinks(db, "examples_sources", "source_id", 4, 11)
+	createLinks(db, "examples_sources", "source_id", 5, 11)
 }
 
 // insertDataSetID remember returning id after inserting data
