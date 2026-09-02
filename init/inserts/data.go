@@ -153,6 +153,17 @@ One user can leave no more than one message per 24 hours.`,
 You are here.`,
 		},
 	},
+	{
+		query: `INSERT INTO examples (name, title, description) VALUES($1, $2, $3) RETURNING id;`,
+		args: []any{
+			"auth",
+			"Authentication",
+			`An example of an authorization system consisting of four applications.
+A frontend application that handles authorization and retrieval of information requiring authorization, and an application for verifying the authenticity of an access token.
+The jwt library is used to create and validate tokens.
+Enter username "dima" and password "password" to log in.`,
+		},
+	},
 }
 
 var links = []request{
@@ -167,6 +178,10 @@ var links = []request{
 	{
 		query: `INSERT INTO links(title, url) VALUES($1, $2) RETURNING id;`,
 		args:  []any{"view messages", "https://msgs.skvdmt.ru/"},
+	},
+	{
+		query: `INSERT INTO links(title, url) VALUES($1, $2) RETURNING id;`,
+		args:  []any{"play", "https://secret.skvdmt.ru/"},
 	},
 }
 
@@ -234,6 +249,26 @@ var sources = []request{
 		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
 		args:  []any{"https://github.com/skvdmt/skvdmt-front"},
 	},
+	{
+		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
+		args:  []any{"https://github.com/skvdmt/secret-front"},
+	},
+	{
+		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
+		args:  []any{"https://github.com/skvdmt/secret-back"},
+	},
+	{
+		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
+		args:  []any{"https://github.com/skvdmt/auth-back"},
+	},
+	{
+		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
+		args:  []any{"https://github.com/skvdmt/valid-access-back"},
+	},
+	{
+		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
+		args:  []any{"https://github.com/skvdmt/jwt"},
+	},
 }
 
 const dublicate = "duplicate key value violates unique constraint"
@@ -256,6 +291,7 @@ func InsertData(db *pgxpool.Pool) {
 	createLinks(db, "examples_links", "link_id", 1, 1)
 	createLinks(db, "examples_links", "link_id", 2, 2)
 	createLinks(db, "examples_links", "link_id", 2, 3)
+	createLinks(db, "examples_links", "link_id", 4, 4)
 
 	createLinks(db, "examples_technologies", "technology_id", 1, 1)
 	createLinks(db, "examples_technologies", "technology_id", 1, 9)
@@ -273,6 +309,15 @@ func InsertData(db *pgxpool.Pool) {
 	createLinks(db, "examples_technologies", "technology_id", 3, 4)
 	createLinks(db, "examples_technologies", "technology_id", 3, 6)
 	createLinks(db, "examples_technologies", "technology_id", 3, 9)
+	createLinks(db, "examples_technologies", "technology_id", 4, 1)
+	createLinks(db, "examples_technologies", "technology_id", 4, 2)
+	createLinks(db, "examples_technologies", "technology_id", 4, 3)
+	createLinks(db, "examples_technologies", "technology_id", 4, 4)
+	createLinks(db, "examples_technologies", "technology_id", 4, 5)
+	createLinks(db, "examples_technologies", "technology_id", 4, 6)
+	createLinks(db, "examples_technologies", "technology_id", 4, 7)
+	createLinks(db, "examples_technologies", "technology_id", 4, 8)
+	createLinks(db, "examples_technologies", "technology_id", 4, 9)
 
 	createLinks(db, "examples_sources", "source_id", 1, 1)
 	createLinks(db, "examples_sources", "source_id", 1, 2)
@@ -280,6 +325,11 @@ func InsertData(db *pgxpool.Pool) {
 	createLinks(db, "examples_sources", "source_id", 2, 4)
 	createLinks(db, "examples_sources", "source_id", 3, 5)
 	createLinks(db, "examples_sources", "source_id", 3, 6)
+	createLinks(db, "examples_sources", "source_id", 4, 7)
+	createLinks(db, "examples_sources", "source_id", 4, 8)
+	createLinks(db, "examples_sources", "source_id", 4, 9)
+	createLinks(db, "examples_sources", "source_id", 4, 10)
+	createLinks(db, "examples_sources", "source_id", 4, 11)
 }
 
 // insertDataSetID remember returning id after inserting data
