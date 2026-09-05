@@ -176,7 +176,7 @@ Enter username "dima" and password "password" to log in.`,
 		query: `INSERT INTO examples (name, title, description) VALUES($1, $2, $3) RETURNING id;`,
 		args: []any{
 			"chrome",
-			"Golang Chrome DevTools library",
+			"Golang Chrome DevTools protocol",
 			`A library for controlling the Google Chrome browser using the Chrome DevTools Protocol.
 It is used for e2e application testing, scraping, and bot creation.`,
 		},
