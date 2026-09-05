@@ -172,6 +172,15 @@ Enter username "dima" and password "password" to log in.`,
 			`Library for generating and validating JSON Web Tokens.`,
 		},
 	},
+	{
+		query: `INSERT INTO examples (name, title, description) VALUES($1, $2, $3) RETURNING id;`,
+		args: []any{
+			"chrome",
+			"Golang Chrome DevTools Protocol library",
+			`A library for controlling the Google Chrome browser using the Chrome DevTools Protocol.
+It is used for e2e application testing, scraping, and bot creation.`,
+		},
+	},
 }
 
 var links = []request{
@@ -277,6 +286,10 @@ var sources = []request{
 		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
 		args:  []any{"https://github.com/skvdmt/jwt"},
 	},
+	{
+		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
+		args:  []any{"https://github.com/skvdmt/chrome"},
+	},
 }
 
 const dublicate = "duplicate key value violates unique constraint"
@@ -327,6 +340,7 @@ func InsertData(db *pgxpool.Pool) {
 	createLinks(db, "examples_technologies", "technology_id", 4, 8)
 	createLinks(db, "examples_technologies", "technology_id", 4, 9)
 	createLinks(db, "examples_technologies", "technology_id", 5, 1)
+	createLinks(db, "examples_technologies", "technology_id", 6, 1)
 
 	createLinks(db, "examples_sources", "source_id", 1, 1)
 	createLinks(db, "examples_sources", "source_id", 1, 2)
@@ -340,6 +354,7 @@ func InsertData(db *pgxpool.Pool) {
 	createLinks(db, "examples_sources", "source_id", 4, 10)
 	createLinks(db, "examples_sources", "source_id", 4, 11)
 	createLinks(db, "examples_sources", "source_id", 5, 11)
+	createLinks(db, "examples_sources", "source_id", 6, 12)
 }
 
 // insertDataSetID remember returning id after inserting data
