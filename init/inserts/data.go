@@ -181,6 +181,17 @@ Enter username "dima" and password "password" to log in.`,
 It is used for e2e application testing, scraping, and bot creation.`,
 		},
 	},
+	{
+		query: `INSERT INTO examples (name, title, description) VALUES($1, $2, $3) RETURNING id;`,
+		args: []any{
+			"e2e",
+			"End-to-end test",
+			`A set of end-to-end tests for this page.
+Implemented using the Chrome DevTools protocol library.
+Nodes are located in the document's DOM model using ID selectors, and their text content is compared against the parameters specified in the tests.
+In the event of a mismatch, the application terminates with status 1.`,
+		},
+	},
 }
 
 var links = []request{
@@ -290,6 +301,10 @@ var sources = []request{
 		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
 		args:  []any{"https://github.com/skvdmt/chrome"},
 	},
+	{
+		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
+		args:  []any{"https://github.com/skvdmt/skvdmt-e2e-tests"},
+	},
 }
 
 const dublicate = "duplicate key value violates unique constraint"
@@ -341,6 +356,7 @@ func InsertData(db *pgxpool.Pool) {
 	createLinks(db, "examples_technologies", "technology_id", 4, 9)
 	createLinks(db, "examples_technologies", "technology_id", 5, 1)
 	createLinks(db, "examples_technologies", "technology_id", 6, 1)
+	createLinks(db, "examples_technologies", "technology_id", 7, 1)
 
 	createLinks(db, "examples_sources", "source_id", 1, 1)
 	createLinks(db, "examples_sources", "source_id", 1, 2)
@@ -355,6 +371,8 @@ func InsertData(db *pgxpool.Pool) {
 	createLinks(db, "examples_sources", "source_id", 4, 11)
 	createLinks(db, "examples_sources", "source_id", 5, 11)
 	createLinks(db, "examples_sources", "source_id", 6, 12)
+	createLinks(db, "examples_sources", "source_id", 7, 13)
+	createLinks(db, "examples_sources", "source_id", 7, 12)
 }
 
 // insertDataSetID remember returning id after inserting data
