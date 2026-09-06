@@ -169,7 +169,8 @@ Enter username "dima" and password "password" to log in.`,
 		args: []any{
 			"jwt",
 			"JSON Web Tokens",
-			`Library for generating and validating JSON Web Tokens.`,
+			`A library for creating, parsing, and validating JSON Web Tokens.
+The token hash is generated using the SHA-256 algorithm with the specified secret encryption key.`,
 		},
 	},
 	{
