@@ -137,6 +137,14 @@ To start the game, two clients must be logged into the page.`,
 	{
 		query: `INSERT INTO examples (name, title, description) VALUES($1, $2, $3) RETURNING id;`,
 		args: []any{
+			"captcha",
+			"Golang Captcha",
+			`A Go library for generating unique text-based images used to verify users and detect bots. It allows you to add custom fonts and specify character sets, character counts, font sizes, and ranges for character tilt angles.`,
+		},
+	},
+	{
+		query: `INSERT INTO examples (name, title, description) VALUES($1, $2, $3) RETURNING id;`,
+		args: []any{
 			"tgbot",
 			"Telegram bot",
 			`Bot that saves messages from users.
@@ -168,7 +176,7 @@ Enter username "dima" and password "password" to log in.`,
 		query: `INSERT INTO examples (name, title, description) VALUES($1, $2, $3) RETURNING id;`,
 		args: []any{
 			"jwt",
-			"JSON Web Tokens",
+			"Golang JSON Web Tokens",
 			`A library for creating, parsing, and validating JSON Web Tokens.
 The token hash is generated using the SHA-256 algorithm with the specified secret encryption key.`,
 		},
@@ -326,20 +334,15 @@ func InsertData(db *pgxpool.Pool) {
 	insertDataSetID(db, &sources)
 
 	createLinks(db, "examples_links", "link_id", 1, 1)
-	createLinks(db, "examples_links", "link_id", 2, 2)
-	createLinks(db, "examples_links", "link_id", 2, 3)
-	createLinks(db, "examples_links", "link_id", 4, 4)
+	createLinks(db, "examples_links", "link_id", 3, 2)
+	createLinks(db, "examples_links", "link_id", 3, 3)
+	createLinks(db, "examples_links", "link_id", 5, 4)
 
 	createLinks(db, "examples_technologies", "technology_id", 1, 1)
 	createLinks(db, "examples_technologies", "technology_id", 1, 9)
 	createLinks(db, "examples_technologies", "technology_id", 1, 3)
 	createLinks(db, "examples_technologies", "technology_id", 1, 6)
 	createLinks(db, "examples_technologies", "technology_id", 2, 1)
-	createLinks(db, "examples_technologies", "technology_id", 2, 2)
-	createLinks(db, "examples_technologies", "technology_id", 2, 3)
-	createLinks(db, "examples_technologies", "technology_id", 2, 4)
-	createLinks(db, "examples_technologies", "technology_id", 2, 6)
-	createLinks(db, "examples_technologies", "technology_id", 2, 9)
 	createLinks(db, "examples_technologies", "technology_id", 3, 1)
 	createLinks(db, "examples_technologies", "technology_id", 3, 2)
 	createLinks(db, "examples_technologies", "technology_id", 3, 3)
@@ -350,30 +353,36 @@ func InsertData(db *pgxpool.Pool) {
 	createLinks(db, "examples_technologies", "technology_id", 4, 2)
 	createLinks(db, "examples_technologies", "technology_id", 4, 3)
 	createLinks(db, "examples_technologies", "technology_id", 4, 4)
-	createLinks(db, "examples_technologies", "technology_id", 4, 5)
 	createLinks(db, "examples_technologies", "technology_id", 4, 6)
-	createLinks(db, "examples_technologies", "technology_id", 4, 7)
-	createLinks(db, "examples_technologies", "technology_id", 4, 8)
 	createLinks(db, "examples_technologies", "technology_id", 4, 9)
 	createLinks(db, "examples_technologies", "technology_id", 5, 1)
+	createLinks(db, "examples_technologies", "technology_id", 5, 2)
+	createLinks(db, "examples_technologies", "technology_id", 5, 3)
+	createLinks(db, "examples_technologies", "technology_id", 5, 4)
+	createLinks(db, "examples_technologies", "technology_id", 5, 5)
+	createLinks(db, "examples_technologies", "technology_id", 5, 6)
+	createLinks(db, "examples_technologies", "technology_id", 5, 7)
+	createLinks(db, "examples_technologies", "technology_id", 5, 8)
+	createLinks(db, "examples_technologies", "technology_id", 5, 9)
 	createLinks(db, "examples_technologies", "technology_id", 6, 1)
 	createLinks(db, "examples_technologies", "technology_id", 7, 1)
+	createLinks(db, "examples_technologies", "technology_id", 8, 1)
 
 	createLinks(db, "examples_sources", "source_id", 1, 1)
 	createLinks(db, "examples_sources", "source_id", 1, 2)
-	createLinks(db, "examples_sources", "source_id", 2, 3)
-	createLinks(db, "examples_sources", "source_id", 2, 4)
-	createLinks(db, "examples_sources", "source_id", 3, 5)
-	createLinks(db, "examples_sources", "source_id", 3, 6)
-	createLinks(db, "examples_sources", "source_id", 4, 7)
-	createLinks(db, "examples_sources", "source_id", 4, 8)
-	createLinks(db, "examples_sources", "source_id", 4, 9)
-	createLinks(db, "examples_sources", "source_id", 4, 10)
-	createLinks(db, "examples_sources", "source_id", 4, 11)
+	createLinks(db, "examples_sources", "source_id", 3, 3)
+	createLinks(db, "examples_sources", "source_id", 3, 4)
+	createLinks(db, "examples_sources", "source_id", 4, 5)
+	createLinks(db, "examples_sources", "source_id", 4, 6)
+	createLinks(db, "examples_sources", "source_id", 5, 7)
+	createLinks(db, "examples_sources", "source_id", 5, 8)
+	createLinks(db, "examples_sources", "source_id", 5, 9)
+	createLinks(db, "examples_sources", "source_id", 5, 10)
 	createLinks(db, "examples_sources", "source_id", 5, 11)
-	createLinks(db, "examples_sources", "source_id", 6, 12)
-	createLinks(db, "examples_sources", "source_id", 7, 13)
+	createLinks(db, "examples_sources", "source_id", 6, 11)
 	createLinks(db, "examples_sources", "source_id", 7, 12)
+	createLinks(db, "examples_sources", "source_id", 8, 13)
+	createLinks(db, "examples_sources", "source_id", 8, 12)
 }
 
 // insertDataSetID remember returning id after inserting data
