@@ -177,7 +177,7 @@ The token hash is generated using the SHA-256 algorithm with the specified secre
 		query: `INSERT INTO examples (name, title, description) VALUES($1, $2, $3) RETURNING id;`,
 		args: []any{
 			"chrome",
-			"Golang Chrome DevTools protocol",
+			"Golang Chrome driver",
 			`A library for controlling the Google Chrome browser using the Chrome DevTools Protocol.
 It is used for e2e application testing, scraping, and bot creation.`,
 		},
