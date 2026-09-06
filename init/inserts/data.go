@@ -157,8 +157,8 @@ One user can leave no more than one message per 24 hours.`,
 		args: []any{
 			"home",
 			"Homepage",
-			`My personal homepage.
-You are here.`,
+			`I am Dmitry Skidanov, a full-stack engineer. This is my personal webpage.
+Here, you can explore the technology stack I use for application development, view examples of my work, and check out the source code.`,
 		},
 	},
 	{
