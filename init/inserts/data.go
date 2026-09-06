@@ -314,6 +314,10 @@ var sources = []request{
 		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
 		args:  []any{"https://github.com/skvdmt/skvdmt-e2e-tests"},
 	},
+	{
+		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
+		args:  []any{"https://github.com/skvdmt/captcha"},
+	},
 }
 
 const dublicate = "duplicate key value violates unique constraint"
@@ -370,6 +374,7 @@ func InsertData(db *pgxpool.Pool) {
 
 	createLinks(db, "examples_sources", "source_id", 1, 1)
 	createLinks(db, "examples_sources", "source_id", 1, 2)
+	createLinks(db, "examples_sources", "source_id", 2, 14)
 	createLinks(db, "examples_sources", "source_id", 3, 3)
 	createLinks(db, "examples_sources", "source_id", 3, 4)
 	createLinks(db, "examples_sources", "source_id", 4, 5)
