@@ -40,6 +40,11 @@ func (a *App) Start(ctx context.Context) error {
 	return a.usecase.Start(ctx)
 }
 
+// Ready Транспортный слой готов обрабатывать запросы.
+func (a *App) Ready() bool {
+	return a.usecase.Ready()
+}
+
 // Stop Остановка транспортного слоя.
 func (a *App) Stop(ctx context.Context) error {
 	// Остановка сервисного слоя.

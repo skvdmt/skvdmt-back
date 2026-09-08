@@ -10,6 +10,8 @@ import (
 type Repository interface {
 	// Запуск.
 	Start(ctx context.Context) error
+	// Репозиторный слой готов обрабатывать запросы.
+	Ready() bool
 	// Остановка.
 	Stop(ctx context.Context) error
 	// Репозиторий текста.

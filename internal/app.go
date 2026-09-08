@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -51,6 +52,8 @@ type App struct {
 	stopping bool
 	// Корректное завершение горутин.
 	wg *sync.WaitGroup
+	// Листнер готов.
+	listenerReady bool
 }
 
 // NewApp Конструктор.
@@ -99,9 +102,14 @@ func (a *App) Start() error {
 		// Настройка и запуск сервера.
 		defer a.wg.Done()
 		a.routes()
+		l, err := net.Listen("tcp", fmt.Sprintf(":%d", model.Config.Server.Port))
+		if err != nil {
+			model.Errors <- err
+		}
 		model.Logs.Info.Info(fmt.Sprintf("http server starting on %d port",
 			model.Config.Server.Port))
-		if err := a.server.ListenAndServe(); err != nil &&
+		a.listenerReady = true
+		if err := a.server.Serve(l); err != nil &&
 			!errors.Is(err, http.ErrServerClosed) {
 			model.Errors <- err
 		}
@@ -117,6 +125,31 @@ func (a *App) Start() error {
 		a.started = true
 	}()
 	return a.interruptHandler()
+}
+
+// Ready Сервер готов обрабатывать запросы.
+func (a *App) Ready() bool {
+	if !a.listenerReady {
+		return false
+	}
+	return a.delivery.Ready()
+}
+
+// HealthCheckLock Метод блокирует выполнение пока
+// сервер не будет готов обрабатывать запросы.
+func (a *App) HelthCheckLock() error {
+	const interval = time.Millisecond * 10
+	const timeout = time.Second * 3
+	s := time.Now()
+	for {
+		if a.Ready() {
+			return nil
+		}
+		time.Sleep(interval)
+		if time.Since(s) > timeout {
+			return fmt.Errorf("helth check timeout")
+		}
+	}
 }
 
 // errorHandle Обработчик глобального канала ошибок.

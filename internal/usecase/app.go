@@ -33,6 +33,11 @@ func (a *App) Start(ctx context.Context) error {
 	return a.repository.Start(ctx)
 }
 
+// Ready Сервисный слой готов обрабатывать запросы.
+func (a *App) Ready() bool {
+	return a.repository.Ready()
+}
+
 // Stop Остановка.
 func (a *App) Stop(ctx context.Context) error {
 	// Остановка репозиторного слоя.

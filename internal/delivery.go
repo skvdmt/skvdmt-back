@@ -9,6 +9,8 @@ import (
 type Delivery interface {
 	// Запуск.
 	Start(ctx context.Context) error
+	// Транспортный слой готов обрабатывать запросы.
+	Ready() bool
 	// Остановка.
 	Stop(ctx context.Context) error
 	// Текстовая информация.

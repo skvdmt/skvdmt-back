@@ -41,6 +41,7 @@ type App struct {
 	updateRunner *time.Ticker
 	updateClose  chan struct{}
 	update       *sync.WaitGroup
+	allUpdated   bool
 
 	sources *sync.WaitGroup
 
@@ -115,6 +116,11 @@ func (a *App) Start(ctx context.Context) error {
 	a.sources.Add(1)
 	go a.updateHandler(ctx)
 	return nil
+}
+
+// Ready Репозиторный слой готов обрабатывать запросы.
+func (a *App) Ready() bool {
+	return a.allUpdated
 }
 
 // Stop Остановка.
@@ -209,6 +215,7 @@ func (a *App) updateAll(ctx context.Context) {
 	go a.updateLibs(ctx)
 	go a.updateLinks(ctx)
 	a.update.Wait()
+	a.allUpdated = true
 	model.Logs.Info.Info("all updated")
 }
 

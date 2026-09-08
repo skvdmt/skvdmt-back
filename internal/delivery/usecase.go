@@ -10,6 +10,8 @@ import (
 type Usecase interface {
 	// Запуск.
 	Start(ctx context.Context) error
+	// Сервисный слой готов обрабатывать запросы.
+	Ready() bool
 	// Остановка.
 	Stop(ctx context.Context) error
 	// Сервис текстов.
