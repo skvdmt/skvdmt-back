@@ -4,6 +4,7 @@ Backend REST API for getting text information for https://skvdmt.ru/
 
 [Swagger-UI API Documentation](https://skvdmt.ru/api/v1/doc/)
 
+[Docker Image](https://hub.docker.com/r/skvdmt/skvdmt-back)
 
 ## Handles
 - Text
@@ -15,7 +16,7 @@ Backend REST API for getting text information for https://skvdmt.ru/
     [libs](https://skvdmt.ru/api/v1/text/libs)
     [prof](https://skvdmt.ru/api/v1/text/prof)
     [abou](https://skvdmt.ru/api/v1/text/abou)
-    [lock](https://skvdmt.ru/api/v1/text/lock)
+    [loca](https://skvdmt.ru/api/v1/text/loca)
 - [Examples](https://skvdmt.ru/api/v1/examples)
 - [Technologies](https://skvdmt.ru/api/v1/technologies)
 - [Software](https://skvdmt.ru/api/v1/software)
