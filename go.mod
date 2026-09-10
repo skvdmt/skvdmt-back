@@ -8,8 +8,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require go.yaml.in/yaml/v3 v3.0.5 // indirect
-
 require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect

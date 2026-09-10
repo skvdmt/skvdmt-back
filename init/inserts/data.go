@@ -53,7 +53,7 @@ var requests = []request{
 	},
 	{
 		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
-		args:  []any{"lock", "Russian Federation, Moscow"},
+		args:  []any{"loca", "Russian Federation, Moscow"},
 	},
 
 	// software

@@ -2,6 +2,8 @@
 
 Backend REST API for getting text information for https://skvdmt.ru/
 
+[Swagger Documentation API](https://skvdmt.ru/api/v1/swagger.yaml)
+
 ## Handles
 - Text
     [main](https://skvdmt.ru/api/v1/text/main)

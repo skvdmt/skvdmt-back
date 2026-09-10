@@ -25,4 +25,6 @@ type Delivery interface {
 	Libs(http.ResponseWriter, *http.Request)
 	// Ссылки.
 	Links(http.ResponseWriter, *http.Request)
+	// Документация.
+	Swagger(http.ResponseWriter, *http.Request)
 }

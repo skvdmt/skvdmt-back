@@ -27,6 +27,8 @@ RUN ln -s /usr/share/zoneinfo/Europe/Moscow /etc/localtime
 # Копирование файлов.
 COPY ./config /etc
 COPY --from=building /usr/local/bin/${NAME} /usr/local/bin/${NAME}
+RUN mkdir /usr/local/share/doc
+COPY ./swagger.yaml /usr/local/share/doc/swagger.yaml
 # Создание точки входа.
 COPY ./docker-entrypoint.sh /usr/local/bin
 RUN echo "exec ${NAME}" >> /usr/local/bin/docker-entrypoint.sh
