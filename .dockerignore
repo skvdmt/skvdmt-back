@@ -1,8 +1,5 @@
 build
 Dockerfile
-Dockerfile.dev
-docker-compose.yaml
-Makefile
 logs
 *.md
 .dockerignore
