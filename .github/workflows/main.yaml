@@ -99,7 +99,7 @@ jobs:
               ${{ github.repository }}
             docker stop ${{ github.event.repository.name }}-doc || true
             docker rm ${{ github.event.repository.name }}-doc || true
-            docker run \
+            docker run -d \
               --name ${{ github.event.repository.name }}-doc \
               --network ${{ secrets.DOCKER_NETWORK }} \
               --restart unless-stopped \
