@@ -126,9 +126,6 @@ func (a *App) Links(w http.ResponseWriter, r *http.Request) {
 // Swagger Документация API.
 func (a *App) Swagger(w http.ResponseWriter, r *http.Request) {
 	s := a.usecase.Swagger(r.Context())
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, PATCH, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, api_key, Authorization")
 	w.Header().Set("Content-Type", "application/yaml")
 	w.WriteHeader(http.StatusOK)
 	w.Write(s)
