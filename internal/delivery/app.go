@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
-	"path/filepath"
 
 	"github.com/skvdmt/skvdmt-back/internal/model"
 	"github.com/skvdmt/skvdmt-back/internal/usecase"
@@ -127,27 +125,7 @@ func (a *App) Links(w http.ResponseWriter, r *http.Request) {
 
 // Swagger Документация API.
 func (a *App) Swagger(w http.ResponseWriter, r *http.Request) {
-	const (
-		fileName = "/swagger.yaml"
-		pathDev  = "."
-		pathProd = "/usr/local/share/doc"
-	)
-	p := pathProd
-	mode, ok := os.LookupEnv(model.MODE)
-	if ok && mode == model.Dev {
-		p = pathDev
-	}
-	s, err := os.ReadFile(filepath.Join(p, fileName))
-	if err != nil {
-		a.errorHandle(w, erw.New(
-			erw.CodeHTTP(http.StatusInternalServerError),
-			erw.Internal(
-				erw.Location(pkg, swg),
-				erw.Error(err),
-			),
-		))
-		return
-	}
+	s := a.usecase.Swagger(r.Context())
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/yaml")
 	w.WriteHeader(http.StatusOK)

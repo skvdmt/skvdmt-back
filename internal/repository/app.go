@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -37,6 +38,7 @@ type App struct {
 	muSoftware     *sync.RWMutex
 	muLinks        *sync.RWMutex
 	muLibs         *sync.RWMutex
+	muSwagger      *sync.RWMutex
 
 	updateRunner *time.Ticker
 	updateClose  chan struct{}
@@ -51,6 +53,7 @@ type App struct {
 	software     []*entities.Software
 	links        []*entities.Link
 	libs         []*entities.Lib
+	swagger      []byte
 }
 
 const (
@@ -102,6 +105,7 @@ func NewApp(ctx context.Context) (*App, error) {
 		muSoftware:     &sync.RWMutex{},
 		muLinks:        &sync.RWMutex{},
 		muLibs:         &sync.RWMutex{},
+		muSwagger:      &sync.RWMutex{},
 	}
 	return a, nil
 }
@@ -187,6 +191,11 @@ func (a *App) Links(ctx context.Context) ([]*entities.Link, error) {
 	return a.links, nil
 }
 
+// Swagger Документация.
+func (a *App) Swagger(ctx context.Context) (swaggerDoc []byte) {
+	return a.swagger
+}
+
 // updateHandler Обработчик обновления данных.
 func (a *App) updateHandler(ctx context.Context) {
 	defer a.sources.Done()
@@ -207,13 +216,14 @@ func (a *App) updateHandler(ctx context.Context) {
 
 // updateAll Обновить все.
 func (a *App) updateAll(ctx context.Context) {
-	a.update.Add(6)
+	a.update.Add(7)
 	go a.updateTexts(ctx)
 	go a.updateTechnologies(ctx)
 	go a.updateExamples(ctx)
 	go a.updateSoftware(ctx)
 	go a.updateLibs(ctx)
 	go a.updateLinks(ctx)
+	go a.updateSwagger()
 	a.update.Wait()
 	a.allUpdated = true
 	model.Logs.Info.Info("all updated")
@@ -429,6 +439,29 @@ func (a *App) updateLinks(ctx context.Context) {
 	a.links = lks
 	a.muLinks.Unlock()
 	a.update.Done()
+}
+
+// updateSwagger Основление документации.
+func (a *App) updateSwagger() {
+	defer a.update.Done()
+	const (
+		pathDev  = "."
+		pathProd = "/usr/local/share/doc"
+		fileName = "swagger.yaml"
+	)
+	p := pathProd
+	mode, ok := os.LookupEnv(model.MODE)
+	if ok && mode == model.Dev {
+		p = pathDev
+	}
+	s, err := os.ReadFile(filepath.Join(p, fileName))
+	if err != nil {
+		model.Errors <- err
+		return
+	}
+	a.muSwagger.Lock()
+	a.swagger = s
+	a.muSwagger.Unlock()
 }
 
 // exampleLinks Ссылки примера.

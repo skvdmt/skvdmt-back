@@ -26,4 +26,6 @@ type Usecase interface {
 	Libs(ctx context.Context) ([]*entities.Lib, error)
 	// Сервис ссылкок.
 	Links(ctx context.Context) ([]*entities.Link, error)
+	// Документация.
+	Swagger(ctx context.Context) (swaggerDoc []byte)
 }

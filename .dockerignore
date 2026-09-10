@@ -3,7 +3,6 @@ Dockerfile
 Dockerfile.dev
 docker-compose.yaml
 Makefile
-swagger.yaml
 logs
 *.md
 .dockerignore
