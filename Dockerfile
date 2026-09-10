@@ -3,9 +3,9 @@ FROM golang:alpine AS preper
 ARG NAME
 WORKDIR /usr/src/${NAME}
 COPY . .
-COPY ./config /etc
 RUN mkdir /usr/local/share/doc
 COPY ./swagger.yaml /usr/local/share/doc/swagger.yaml
+COPY ./config /etc
 RUN go mod download
 
 # Тестирование.
