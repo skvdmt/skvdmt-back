@@ -1,5 +1,5 @@
 # Подготовка.
-FROM golang:latest AS preper
+FROM golang:alpine AS preper
 ARG NAME
 WORKDIR /usr/src/${NAME}
 COPY . .
