@@ -4,12 +4,14 @@ ARG NAME
 WORKDIR /usr/src/${NAME}
 COPY . .
 COPY ./config /etc
+RUN mkdir /usr/local/share/doc
+COPY ./swagger.yaml /usr/local/share/doc/swagger.yaml
 RUN go mod download
 
 # Тестирование.
 FROM preper AS testing
 ARG DB_PASSWORD
-# RUN go test --tags=unit -v ./...
+RUN go test --tags=unit -v ./...
 RUN go test --tags=integration -v ./...
 RUN go test --tags=e2e -v ./...
 
