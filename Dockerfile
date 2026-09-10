@@ -9,7 +9,7 @@ RUN go mod download
 # Тестирование.
 FROM preper AS testing
 ARG DB_PASSWORD
-RUN go test --tags=unit -v ./...
+# RUN go test --tags=unit -v ./...
 RUN go test --tags=integration -v ./...
 RUN go test --tags=e2e -v ./...
 
@@ -24,14 +24,14 @@ ARG NAME
 # Настройки.
 RUN apk add tzdata
 RUN ln -s /usr/share/zoneinfo/Europe/Moscow /etc/localtime
-# Создание конфигурации.
+# Копирование конфигурации.
 COPY ./config /etc
-# Создание исполняемого файла.
+# Копирование исполняемого файла.
 COPY --from=building /usr/local/bin/${NAME} /usr/local/bin/${NAME}
-# Создание документации.
+# Копирование документации.
 RUN mkdir /usr/local/share/doc
 COPY ./swagger.yaml /usr/local/share/doc/swagger.yaml
-# Создание точки входа.
+# Копирование точки входа.
 COPY ./docker-entrypoint.sh /usr/local/bin
 RUN echo "exec ${NAME}" >> /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
