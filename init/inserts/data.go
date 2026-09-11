@@ -148,7 +148,7 @@ To start the game, two clients must be logged into the page.`,
 			"tgbot",
 			"Telegram bot",
 			`Bot that saves messages from users.
-Before leaving a message, you must pass the test by entering the characters from the picture.
+Before sending a message, you must pass the test by entering the characters from the picture.
 One user can leave no more than one message per 24 hours.`,
 		},
 	},
