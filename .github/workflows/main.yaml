@@ -37,6 +37,7 @@ jobs:
         run: |
           ssh -i ~/.ssh/github_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} <<EOF
             cd ~/src/${{ github.event.repository.name }}
+            set -o pipefail
             docker buildx create --use \
               --name ${{ secrets.DOCKER_NETWORK }}-builder \
               --driver docker-container \
