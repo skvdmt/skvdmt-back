@@ -68,7 +68,7 @@ func TestGetTexts(t *testing.T) {
 			expected: fmt.Sprintf("Dmitry Skidanov — full stack engineer %d", time.Now().Year()),
 		},
 		{
-			name:     "lock",
+			name:     "loca",
 			expected: "Russian Federation, Moscow",
 		},
 	}
