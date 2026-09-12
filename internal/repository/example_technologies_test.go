@@ -33,7 +33,7 @@ func TestExampleTechnologies(t *testing.T) {
 	}
 
 	expecteds := []string{
-		"Go", "Docker", "Git", "Vue",
+		"Go", "Docker", "Git", "Vue2",
 	}
 	t.Run(fmt.Sprintf("example %s technologies", title), func(t *testing.T) {
 		actuals, err := p.app.exampleTechnologies(context.Background(), *id)
