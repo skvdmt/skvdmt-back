@@ -4,7 +4,7 @@ Backend REST API for getting text information for https://skvdmt.ru/
 
 [Swagger-UI API Documentation](https://skvdmt.ru/api/v1/doc/)
 
-[Docker Image](https://hub.docker.com/r/skvdmt/skvdmt-back)
+[Docker Image](https://hub.docker.com/r/skvdmt/skvdmt-back-v1)
 
 ## Handles
 - Text
