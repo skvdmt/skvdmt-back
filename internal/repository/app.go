@@ -225,7 +225,7 @@ func (a *App) updateAll(ctx context.Context) {
 	go a.updateSoftware(ctx)
 	go a.updateLibs(ctx)
 	go a.updateLinks(ctx)
-	go a.updateSwagger()
+	go a.updateDocumentation()
 	a.update.Wait()
 	a.allUpdated = true
 	model.Logs.Info.Info("all updated")
@@ -443,13 +443,13 @@ func (a *App) updateLinks(ctx context.Context) {
 	a.update.Done()
 }
 
-// updateSwagger Основление документации.
-func (a *App) updateSwagger() {
+// updateDocumentation Основление документации.
+func (a *App) updateDocumentation() {
 	defer a.update.Done()
 	const (
 		pathDev  = "."
 		pathProd = "/usr/local/share/doc"
-		fileName = "swagger.yaml"
+		fileName = "openapi.yaml"
 	)
 	p := pathProd
 	mode, ok := os.LookupEnv(model.MODE)
