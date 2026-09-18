@@ -12,11 +12,11 @@ const (
 	APP_NAME = "skvdmt-back"
 
 	// Путь в директории конфигурации. (Добавляется директория с именем приложения).
-	configDirectoryProd = "/etc"
-	configDirectoryDev  = "./config"
+	CONFIG_DIRECTORY_PROD = "/etc"
+	CONFIG_DIRECTORY_DEV  = "./config"
 	// Имя файла конфигурации.
-	configFileNameProd = "prod.yaml"
-	configFileNameDev  = "dev.yaml"
+	CONFIG_FILENAME_PROD = "prod.yaml"
+	CONFIG_FILENAME_DEV  = "dev.yaml"
 )
 
 // Config Глобальная конфигурация.
@@ -40,26 +40,47 @@ type ServerConfig struct {
 type MainConfig struct {
 	Postgres *PostgresConfig `yaml:"postgres"`
 	Server   *ServerConfig   `yaml:"server"`
+	Links    *LinksConfig    `yaml:"links"`
 }
 
-// LoadConfig Загрузка конфигурации в глобальную переменную Config.
-func LoadConfig() error {
+// LinksConfig Ссылки
+type LinksConfig struct {
+	Api           string `yaml:"api"`
+	Documentation string `yaml:"documentation"`
+}
+
+// NewConfig Конфигурация.
+func NewConfig() (*MainConfig, error) {
 	Logs.Info.Info("configuration loading")
-	configDirectory := configDirectoryProd
-	configFileName := configFileNameProd
-	mode, ok := os.LookupEnv(MODE)
-	if ok && mode == Dev {
-		configDirectory = configDirectoryDev
-		configFileName = configFileNameDev
-	}
-	d, err := os.ReadFile(filepath.Join(configDirectory, configFileName))
+	f, err := os.ReadFile(filepath.Join(configDir(), configFilename()))
 	if err != nil {
-		return err
+		return nil, err
 	}
-	cfg := &MainConfig{}
-	if err := yaml.Unmarshal(d, cfg); err != nil {
-		return err
+	c := &MainConfig{
+		Postgres: &PostgresConfig{},
+		Server:   &ServerConfig{},
+		Links:    &LinksConfig{},
 	}
-	Config = cfg
-	return nil
+	if err := yaml.Unmarshal(f, c); err != nil {
+		return nil, err
+	}
+	return c, nil
+}
+
+// configDir Директоия конфигурации.
+func configDir() string {
+	m, o := os.LookupEnv(MODE)
+	if o && m == MODE_DEV {
+		return CONFIG_DIRECTORY_DEV
+	}
+	return filepath.Join(CONFIG_DIRECTORY_PROD, APP_NAME)
+}
+
+// configFilename Имя файла конфигурации.
+func configFilename() string {
+	m, o := os.LookupEnv(MODE)
+	if o && m == MODE_DEV {
+		return CONFIG_FILENAME_DEV
+	}
+	return CONFIG_FILENAME_PROD
 }

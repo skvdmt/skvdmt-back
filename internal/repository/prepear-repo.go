@@ -22,8 +22,10 @@ func NewPrepearRepo() (*PrepearRepo, error) {
 	if err := model.LoadLogger(); err != nil {
 		return nil, err
 	}
+	var err error
 	// Загрузка конфигурации.
-	if err := model.LoadConfig(); err != nil {
+	model.Config, err = model.NewConfig()
+	if err != nil {
 		return nil, err
 	}
 	// Создаем глобальный канал ошибок.

@@ -68,7 +68,7 @@ func NewApp(ctx context.Context) (*App, error) {
 	model.Logs.Info.Info("database connection creating")
 	penv := DB_PASSWORD
 	mode, ok := os.LookupEnv(model.MODE)
-	if ok && mode == model.Dev {
+	if ok && mode == model.MODE_DEV {
 		penv = POSTGRES_PASSWORD
 	}
 	pwd, ok := os.LookupEnv(penv)
@@ -453,7 +453,7 @@ func (a *App) updateDocumentation() {
 	)
 	p := pathProd
 	mode, ok := os.LookupEnv(model.MODE)
-	if ok && mode == model.Dev {
+	if ok && mode == model.MODE_DEV {
 		p = pathDev
 	}
 	d, err := os.ReadFile(filepath.Join(p, fileName))

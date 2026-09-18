@@ -59,12 +59,16 @@ type App struct {
 
 // NewApp Конструктор.
 func NewApp() (*App, error) {
-	model.Logs.Info.Info(fmt.Sprintf("%s creating", model.APP_NAME))
 	var err error
 	// Загрузка конфигурации.
-	if err = model.LoadConfig(); err != nil {
+	model.Config, err = model.NewConfig()
+	if err != nil {
 		return nil, err
 	}
+	model.Logs.Info.Info(fmt.Sprintf("API url %s", model.Config.Links.Api))
+	model.Logs.Info.Info(fmt.Sprintf("Documentation %s", model.Config.Links.Documentation))
+
+	model.Logs.Info.Info(fmt.Sprintf("%s creating", model.APP_NAME))
 	// Создаем глобальный канал ошибок.
 	model.Errors = make(chan error)
 	// Создание сервера.
