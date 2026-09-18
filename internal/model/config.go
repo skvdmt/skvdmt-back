@@ -15,8 +15,8 @@ const (
 	configDirectoryProd = "/etc"
 	configDirectoryDev  = "./config"
 	// Имя файла конфигурации.
-	configFileNameProd = "config.yaml"
-	configFileNameDev  = "config-dev.yaml"
+	configFileNameProd = "prod.yaml"
+	configFileNameDev  = "dev.yaml"
 )
 
 // Config Глобальная конфигурация.
@@ -52,7 +52,7 @@ func LoadConfig() error {
 		configDirectory = configDirectoryDev
 		configFileName = configFileNameDev
 	}
-	d, err := os.ReadFile(filepath.Join(configDirectory, APP_NAME, configFileName))
+	d, err := os.ReadFile(filepath.Join(configDirectory, configFileName))
 	if err != nil {
 		return err
 	}

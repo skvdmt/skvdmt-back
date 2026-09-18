@@ -2,10 +2,16 @@
 FROM golang:alpine AS preper
 ARG NAME
 WORKDIR /usr/src/${NAME}
-COPY . .
+# Создание директории конфигурации.
+RUN mkdir /etc/${NAME}
+# Создание директории журналов.
+RUN mkdir /var/log/${NAME}
+# Создание директории документации.
 RUN mkdir /usr/local/share/doc
+# Копирование файлов.
+COPY . .
 COPY ./openapi.yaml /usr/local/share/doc/openapi.yaml
-COPY ./config /etc
+COPY ./config/prod.yaml /etc/${NAME}/prod.yaml
 RUN go mod download
 
 # Тестирование.
