@@ -123,9 +123,9 @@ func (a *App) Links(w http.ResponseWriter, r *http.Request) {
 	a.sendJSON(w, http.StatusOK, lks)
 }
 
-// Swagger Документация API.
-func (a *App) Swagger(w http.ResponseWriter, r *http.Request) {
-	s := a.usecase.Swagger(r.Context())
+// Documentation Документация.
+func (a *App) Documentation(w http.ResponseWriter, r *http.Request) {
+	s := a.usecase.Documentation(r.Context())
 	w.Header().Set("Content-Type", "application/yaml")
 	w.WriteHeader(http.StatusOK)
 	w.Write(s)

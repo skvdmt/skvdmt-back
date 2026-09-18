@@ -4,7 +4,7 @@ ARG NAME
 WORKDIR /usr/src/${NAME}
 COPY . .
 RUN mkdir /usr/local/share/doc
-COPY ./swagger.yaml /usr/local/share/doc/swagger.yaml
+COPY ./openapi.yaml /usr/local/share/doc/openapi.yaml
 COPY ./config /etc
 RUN go mod download
 
@@ -26,13 +26,17 @@ ARG NAME
 # Настройки.
 RUN apk add tzdata
 RUN ln -s /usr/share/zoneinfo/Europe/Moscow /etc/localtime
+# Создание директории журналов.
+RUN mkdir /var/log/${NAME}
+# Создание директории конфигурации.
+RUN mkdir /etc/${NAME}
 # Копирование конфигурации.
-COPY ./config /etc
+COPY ./config/prod.yaml /etc/${NAME}/prod.yaml
 # Копирование исполняемого файла.
 COPY --from=building /usr/local/bin/${NAME} /usr/local/bin/${NAME}
 # Копирование документации.
 RUN mkdir /usr/local/share/doc
-COPY ./swagger.yaml /usr/local/share/doc/swagger.yaml
+COPY ./openapi.yaml /usr/local/share/doc/openapi.yaml
 # Копирование точки входа.
 COPY ./docker-entrypoint.sh /usr/local/bin
 RUN echo "exec ${NAME}" >> /usr/local/bin/docker-entrypoint.sh

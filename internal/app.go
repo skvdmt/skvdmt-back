@@ -27,7 +27,7 @@ const (
 	url_software          = "/software"
 	url_libs              = "/libs"
 	url_links             = "/links"
-	url_swagger           = "/swagger.yaml"
+	url_documentation     = "/openapi.yaml"
 )
 
 // App Основная структура приложения.
@@ -231,6 +231,6 @@ func (a *App) routes() error {
 	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_software)), a.delivery.Software)
 	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_libs)), a.delivery.Libs)
 	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_links)), a.delivery.Links)
-	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_swagger)), a.delivery.Swagger)
+	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_documentation)), a.delivery.Documentation)
 	return nil
 }

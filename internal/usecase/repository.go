@@ -27,5 +27,5 @@ type Repository interface {
 	// Репозиторий ссылок.
 	Links(ctx context.Context) ([]*entities.Link, error)
 	// Документация.
-	Swagger(ctx context.Context) (swaggerDoc []byte)
+	Documentation(ctx context.Context) []byte
 }

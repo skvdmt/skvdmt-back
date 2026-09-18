@@ -78,7 +78,7 @@ func (a *App) Links(ctx context.Context) ([]*entities.Link, error) {
 	return a.repository.Links(ctx)
 }
 
-// Swagger Документация.
-func (a *App) Swagger(ctx context.Context) (swaggerDoc []byte) {
-	return a.repository.Swagger(ctx)
+// Documentation Документация.
+func (a *App) Documentation(ctx context.Context) (swaggerDoc []byte) {
+	return a.repository.Documentation(ctx)
 }

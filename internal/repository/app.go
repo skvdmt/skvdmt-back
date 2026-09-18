@@ -24,21 +24,21 @@ const (
 	examples       = "examples"
 	software       = "software"
 	libs           = "libs"
-	links          = "links"
+	footerLinks    = "footer_links"
 	sources        = "sources"
 	updateInterval = 5
 )
 
 // App Репозиторный слой.
 type App struct {
-	db             *pgxpool.Pool
-	muTexts        *sync.RWMutex
-	muTechnologies *sync.RWMutex
-	muExamples     *sync.RWMutex
-	muSoftware     *sync.RWMutex
-	muLinks        *sync.RWMutex
-	muLibs         *sync.RWMutex
-	muSwagger      *sync.RWMutex
+	db              *pgxpool.Pool
+	muTexts         *sync.RWMutex
+	muTechnologies  *sync.RWMutex
+	muExamples      *sync.RWMutex
+	muSoftware      *sync.RWMutex
+	muLinks         *sync.RWMutex
+	muLibs          *sync.RWMutex
+	muDocumentation *sync.RWMutex
 
 	updateRunner *time.Ticker
 	updateClose  chan struct{}
@@ -47,13 +47,13 @@ type App struct {
 
 	sources *sync.WaitGroup
 
-	texts        map[string]*entities.Text
-	technologies []*entities.Technology
-	examples     []*entities.Example
-	software     []*entities.Software
-	links        []*entities.Link
-	libs         []*entities.Lib
-	swagger      []byte
+	texts         map[string]*entities.Text
+	technologies  []*entities.Technology
+	examples      []*entities.Example
+	software      []*entities.Software
+	links         []*entities.Link
+	libs          []*entities.Lib
+	documentation []byte
 }
 
 const (
@@ -94,18 +94,18 @@ func NewApp(ctx context.Context) (*App, error) {
 	inserts.InsertData(dbpool)
 
 	a := &App{
-		db:             dbpool,
-		texts:          make(map[string]*entities.Text),
-		updateClose:    make(chan struct{}, 1),
-		update:         &sync.WaitGroup{},
-		sources:        &sync.WaitGroup{},
-		muTexts:        &sync.RWMutex{},
-		muTechnologies: &sync.RWMutex{},
-		muExamples:     &sync.RWMutex{},
-		muSoftware:     &sync.RWMutex{},
-		muLinks:        &sync.RWMutex{},
-		muLibs:         &sync.RWMutex{},
-		muSwagger:      &sync.RWMutex{},
+		db:              dbpool,
+		texts:           make(map[string]*entities.Text),
+		updateClose:     make(chan struct{}, 1),
+		update:          &sync.WaitGroup{},
+		sources:         &sync.WaitGroup{},
+		muTexts:         &sync.RWMutex{},
+		muTechnologies:  &sync.RWMutex{},
+		muExamples:      &sync.RWMutex{},
+		muSoftware:      &sync.RWMutex{},
+		muLinks:         &sync.RWMutex{},
+		muLibs:          &sync.RWMutex{},
+		muDocumentation: &sync.RWMutex{},
 	}
 	return a, nil
 }
@@ -191,9 +191,11 @@ func (a *App) Links(ctx context.Context) ([]*entities.Link, error) {
 	return a.links, nil
 }
 
-// Swagger Документация.
-func (a *App) Swagger(ctx context.Context) (swaggerDoc []byte) {
-	return a.swagger
+// Documentation Документация.
+func (a *App) Documentation(ctx context.Context) []byte {
+	a.muDocumentation.RLock()
+	defer a.muDocumentation.RUnlock()
+	return a.documentation
 }
 
 // updateHandler Обработчик обновления данных.
@@ -413,7 +415,7 @@ func (a *App) updateLibs(ctx context.Context) {
 func (a *App) updateLinks(ctx context.Context) {
 	query := fmt.Sprintf(
 		"select %s, %s, %s from %s order by id",
-		"id", "title", "url", "footer_links",
+		"id", "title", "url", footerLinks,
 	)
 	rows, err := a.db.Query(ctx, query)
 	if err != nil {
@@ -454,14 +456,14 @@ func (a *App) updateSwagger() {
 	if ok && mode == model.Dev {
 		p = pathDev
 	}
-	s, err := os.ReadFile(filepath.Join(p, fileName))
+	d, err := os.ReadFile(filepath.Join(p, fileName))
 	if err != nil {
 		model.Errors <- err
 		return
 	}
-	a.muSwagger.Lock()
-	a.swagger = s
-	a.muSwagger.Unlock()
+	a.muDocumentation.Lock()
+	a.documentation = d
+	a.muDocumentation.Unlock()
 }
 
 // exampleLinks Ссылки примера.
