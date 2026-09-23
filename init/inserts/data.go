@@ -264,7 +264,7 @@ var technologies = []request{
 var sources = []request{
 	{
 		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
-		args:  []any{"https://github.com/skvdmt/chess-back-game"},
+		args:  []any{"https://github.com/skvdmt/chess-game-back"},
 	},
 	{
 		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
