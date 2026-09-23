@@ -22,7 +22,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Text'
+                $ref: '#/components/schemas/ObjectText'
   /text/tech:
     get:
       tags: [ Тексты ]
@@ -34,7 +34,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Text'
+                $ref: '#/components/schemas/ObjectText'
   /text/exam:
     get:
       tags: [ Тексты ]
@@ -46,7 +46,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Text'
+                $ref: '#/components/schemas/ObjectText'
   /text/favo:
     get:
       tags: [ Тексты ]
@@ -58,7 +58,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Text'
+                $ref: '#/components/schemas/ObjectText'
   /text/soft:
     get:
       tags: [ Тексты ]
@@ -70,7 +70,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Text'
+                $ref: '#/components/schemas/ObjectText'
   /text/libs:
     get:
       tags: [ Тексты ]
@@ -82,7 +82,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Text'
+                $ref: '#/components/schemas/ObjectText'
   /text/prof:
     get:
       tags: [ Тексты ]
@@ -94,7 +94,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Text'
+                $ref: '#/components/schemas/ObjectText'
   /text/abou:
     get:
       tags: [ Тексты ]
@@ -106,7 +106,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Text'
+                $ref: '#/components/schemas/ObjectText'
   /text/loca:
     get:
       tags: [ Тексты ]
@@ -118,7 +118,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Text'
+                $ref: '#/components/schemas/ObjectText'
   /technologies:
     get:
       tags: [ Остальное ]
