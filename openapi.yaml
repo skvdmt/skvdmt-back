@@ -22,7 +22,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/definitions/ObjectText'
+                $ref: '#/components/schemas/Text'
   /text/tech:
     get:
       tags: [ Тексты ]
@@ -34,7 +34,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/definitions/ObjectText'
+                $ref: '#/components/schemas/Text'
   /text/exam:
     get:
       tags: [ Тексты ]
@@ -46,7 +46,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/definitions/ObjectText'
+                $ref: '#/components/schemas/Text'
   /text/favo:
     get:
       tags: [ Тексты ]
@@ -58,7 +58,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/definitions/ObjectText'
+                $ref: '#/components/schemas/Text'
   /text/soft:
     get:
       tags: [ Тексты ]
@@ -70,7 +70,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/definitions/ObjectText'
+                $ref: '#/components/schemas/Text'
   /text/libs:
     get:
       tags: [ Тексты ]
@@ -82,7 +82,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/definitions/ObjectText'
+                $ref: '#/components/schemas/Text'
   /text/prof:
     get:
       tags: [ Тексты ]
@@ -94,7 +94,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/definitions/ObjectText'
+                $ref: '#/components/schemas/Text'
   /text/abou:
     get:
       tags: [ Тексты ]
@@ -106,7 +106,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/definitions/ObjectText'
+                $ref: '#/components/schemas/Text'
   /text/loca:
     get:
       tags: [ Тексты ]
@@ -118,7 +118,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/definitions/ObjectText'
+                $ref: '#/components/schemas/Text'
   /technologies:
     get:
       tags: [ Остальное ]
@@ -132,7 +132,7 @@ paths:
               schema:
                 type: array
                 items: 
-                  $ref: '#/definitions/Technology'
+                  $ref: '#/components/schemas/Technology'
   /examples:
     get:
       tags: [ Остальное ]
@@ -146,7 +146,7 @@ paths:
               schema:
                 type: array
                 items: 
-                  $ref: '#/definitions/Example'
+                  $ref: '#/components/schemas/Example'
   /software:
     get:
       tags: [ Остальное ]
@@ -160,7 +160,7 @@ paths:
               schema:
                 type: array
                 items: 
-                  $ref: '#/definitions/Software'
+                  $ref: '#/components/schemas/Software'
   /libs:
     get:
       tags: [ Остальное ]
@@ -174,7 +174,7 @@ paths:
               schema:
                 type: array
                 items: 
-                  $ref: '#/definitions/Lib'
+                  $ref: '#/components/schemas/Lib'
   /links:
     get:
       tags: [ Остальное ]
@@ -188,7 +188,7 @@ paths:
               schema:
                 type: array
                 items: 
-                  $ref: '#/definitions/Link'
+                  $ref: '#/components/schemas/Link'
 components:
   schemas:
     ObjectText:
@@ -198,9 +198,9 @@ components:
       - text
       properties:
         id:
-          $ref: '#/definitions/Id'
+          $ref: '#/components/schemas/Id'
         text:
-          $ref: '#/definitions/Text'
+          $ref: '#/components/schemas/Text'
     Technology:
       type: object
       required:
@@ -209,11 +209,11 @@ components:
       - url
       properties:
         id:
-          $ref: '#/definitions/Id'
+          $ref: '#/components/schemas/Id'
         name:
-          $ref: '#/definitions/Name'
+          $ref: '#/components/schemas/Name'
         url:
-          $ref: '#/definitions/Url'
+          $ref: '#/components/schemas/Url'
     Example:
       type: object
       required:
@@ -223,25 +223,25 @@ components:
       - description
       properties:
         id:
-          $ref: '#/definitions/Id'
+          $ref: '#/components/schemas/Id'
         name:
-          $ref: '#/definitions/Name'
+          $ref: '#/components/schemas/Name'
         title:
-          $ref: '#/definitions/Title'
+          $ref: '#/components/schemas/Title'
         description:
-          $ref: '#/definitions/Description'
+          $ref: '#/components/schemas/Description'
         technologies:
           type: array
           items:
-            $ref: '#/definitions/Technology'
+            $ref: '#/components/schemas/Technology'
         links:
           type: array
           items:
-            $ref: '#/definitions/Link'
+            $ref: '#/components/schemas/Link'
         sources:
           type: array
           items:
-            $ref: '#/definitions/Source'
+            $ref: '#/components/schemas/Source'
     Link:
       type: object
       required:
@@ -250,11 +250,11 @@ components:
       - url
       properties:
         id:
-          $ref: '#/definitions/Id'
+          $ref: '#/components/schemas/Id'
         title:
-          $ref: '#/definitions/Title'
+          $ref: '#/components/schemas/Title'
         url:
-          $ref: '#/definitions/Url'
+          $ref: '#/components/schemas/Url'
     Source:
       type: object
       required:
@@ -262,9 +262,9 @@ components:
       - url
       properties:
         id:
-          $ref: '#/definitions/Id'
+          $ref: '#/components/schemas/Id'
         url:
-          $ref: '#/definitions/Url'
+          $ref: '#/components/schemas/Url'
     Lib:
       type: object
       required:
@@ -272,9 +272,9 @@ components:
       - url
       properties:
         id:
-          $ref: '#/definitions/Id'
+          $ref: '#/components/schemas/Id'
         url:
-          $ref: '#/definitions/Url'
+          $ref: '#/components/schemas/Url'
     Software:
       type: object
       required:
@@ -283,11 +283,11 @@ components:
       - url
       properties:
         id:
-          $ref: '#/definitions/Id'
+          $ref: '#/components/schemas/Id'
         title:
-          $ref: '#/definitions/Title'
+          $ref: '#/components/schemas/Title'
         url:
-          $ref: '#/definitions/Url'
+          $ref: '#/components/schemas/Url'
     Id:
       type: string
       format: uuid
