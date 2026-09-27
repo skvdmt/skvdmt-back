@@ -58,11 +58,11 @@ func TestGetTechnologies(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	expecteds := []string{
+	expects := []string{
 		"Go", "Postgres", "Docker", "REST API", "gRPC",
 		"Git", "CI/CD", "JavaScript", "Vue",
 	}
-	for _, expected := range expecteds {
+	for _, expected := range expects {
 		t.Run(fmt.Sprintf("%s %s", "technology", expected), func(t *testing.T) {
 			f := false
 			for _, actual := range actuals {
@@ -73,7 +73,7 @@ func TestGetTechnologies(t *testing.T) {
 				}
 			}
 			if !f {
-				t.Errorf("\n\nerror: technologi %s not found\n\n", expected)
+				t.Errorf("\n\nerror: technology %s not found\n\n", expected)
 			}
 		})
 	}

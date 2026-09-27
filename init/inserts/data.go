@@ -320,14 +320,14 @@ var sources = []request{
 	},
 }
 
-const dublicate = "duplicate key value violates unique constraint"
+const duplicate = "duplicate key value violates unique constraint"
 
 // InsertData insert default data to database tables
 func InsertData(db *pgxpool.Pool) {
 	for _, req := range requests {
 		_, err := db.Exec(context.Background(), req.query, req.args...)
 		if err != nil {
-			if !strings.Contains(err.Error(), dublicate) {
+			if !strings.Contains(err.Error(), duplicate) {
 				model.Logs.Error.Error(err.Error())
 			}
 		}
@@ -395,7 +395,7 @@ func insertDataSetID(db *pgxpool.Pool, rs *[]request) {
 	for i, req := range *rs {
 		if err := db.QueryRow(context.Background(), req.query,
 			req.args...).Scan(&(*rs)[i].id); err != nil {
-			if !strings.Contains(err.Error(), dublicate) {
+			if !strings.Contains(err.Error(), duplicate) {
 				model.Logs.Error.Error(err.Error())
 			}
 		}
@@ -417,7 +417,7 @@ func createLinks(db *pgxpool.Pool, table, field string, exampleID, targetID int)
 	}
 	if examples[exampleID-1].id.String() != defaultID &&
 		id.String() != defaultID {
-		db.Exec(
+		_, err := db.Exec(
 			context.Background(),
 			fmt.Sprintf(
 				"INSERT INTO %s(example_id, %s) VALUES($1, $2);",
@@ -425,5 +425,10 @@ func createLinks(db *pgxpool.Pool, table, field string, exampleID, targetID int)
 			),
 			examples[exampleID-1].id, id,
 		)
+		if err != nil {
+			if !strings.Contains(err.Error(), duplicate) {
+				model.Logs.Error.Error(err.Error())
+			}
+		}
 	}
 }

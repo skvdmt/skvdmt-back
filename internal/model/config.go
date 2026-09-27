@@ -67,7 +67,7 @@ func NewConfig() (*MainConfig, error) {
 	return c, nil
 }
 
-// configDir Директоия конфигурации.
+// configDir Директория конфигурации.
 func configDir() string {
 	m, o := os.LookupEnv(MODE)
 	if o && m == MODE_DEV {

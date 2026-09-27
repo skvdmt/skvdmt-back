@@ -32,7 +32,7 @@ func TestExampleSources(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	expecteds := []string{
+	expects := []string{
 		"https://github.com/skvdmt/secret-front",
 		"https://github.com/skvdmt/secret-back",
 		"https://github.com/skvdmt/auth-back",
@@ -44,7 +44,7 @@ func TestExampleSources(t *testing.T) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		for _, expected := range expecteds {
+		for _, expected := range expects {
 			f := false
 			for _, actual := range *actuals {
 				if expected == actual.Url {

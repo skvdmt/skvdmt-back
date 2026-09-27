@@ -15,11 +15,11 @@ type Delivery interface {
 	Stop(ctx context.Context) error
 	// Текстовая информация.
 	Text(http.ResponseWriter, *http.Request)
-	// Техннологии.
+	// Технологии.
 	Technologies(http.ResponseWriter, *http.Request)
 	// Примеры.
 	Examples(http.ResponseWriter, *http.Request)
-	// Програмное обеспечение.
+	// Программное обеспечение.
 	Software(http.ResponseWriter, *http.Request)
 	// Библиотеки.
 	Libs(http.ResponseWriter, *http.Request)

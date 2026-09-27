@@ -32,7 +32,7 @@ func TestExampleLinks(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	expecteds := []string{
+	expects := []string{
 		"https://t.me/skidanovdima_msgs_bot",
 		"https://msgs.skvdmt.ru/",
 	}
@@ -41,7 +41,7 @@ func TestExampleLinks(t *testing.T) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		for _, expected := range expecteds {
+		for _, expected := range expects {
 			f := false
 			for _, actual := range *actuals {
 				if expected == actual.Url {

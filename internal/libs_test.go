@@ -58,13 +58,13 @@ func TestGetLibs(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	expecteds := []string{
+	expects := []string{
 		"https://github.com/labstack/echo",
 		"https://github.com/grpc/grpc-go",
 		"https://github.com/jackc/pgx",
 		"https://github.com/gorilla/websocket",
 	}
-	for _, expected := range expecteds {
+	for _, expected := range expects {
 		t.Run(fmt.Sprintf("%s %s", "lib", expected), func(t *testing.T) {
 			f := false
 			for _, actual := range actuals {

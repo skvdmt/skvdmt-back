@@ -7,10 +7,10 @@ import (
 	"github.com/skvdmt/skvdmt-back/internal/model"
 )
 
-// main Точка входа в приложение.
+// Main Точка входа в приложение.
 func main() {
 	// Создание логгера.
-	if err := model.LoadLogger(); err != nil {
+	if err := model.CreateLogger(); err != nil {
 		panic(err)
 	}
 	// Создание приложения.

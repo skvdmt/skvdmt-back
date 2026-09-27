@@ -10,16 +10,16 @@ import (
 	"github.com/skvdmt/skvdmt-back/internal/model"
 )
 
-// PrepearRepo Подготовка репозитория для юнит тестов.
-type PrepearRepo struct {
+// PrepareRepo Подготовка репозитория для юнит тестов.
+type PrepareRepo struct {
 	app *App
 	wg  *sync.WaitGroup
 }
 
-// NewPrepearRepo Конструктор.
-func NewPrepearRepo() (*PrepearRepo, error) {
+// NewPrepareRepo Конструктор.
+func NewPrepareRepo() (*PrepareRepo, error) {
 	// Создание логгера.
-	if err := model.LoadLogger(); err != nil {
+	if err := model.CreateLogger(); err != nil {
 		return nil, err
 	}
 	var err error
@@ -34,21 +34,21 @@ func NewPrepearRepo() (*PrepearRepo, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &PrepearRepo{
+	return &PrepareRepo{
 		app: r,
 		wg:  &sync.WaitGroup{},
 	}, nil
 }
 
 // Start Запуск.
-func (p *PrepearRepo) Start() error {
+func (p *PrepareRepo) Start() error {
 	if err := p.app.Start(context.Background()); err != nil {
 		return err
 	}
 	return p.HealthCheckLock()
 }
 
-func (p *PrepearRepo) HealthCheckLock() error {
+func (p *PrepareRepo) HealthCheckLock() error {
 	s := time.Now()
 	for {
 		if p.app.Ready() {
@@ -61,12 +61,12 @@ func (p *PrepearRepo) HealthCheckLock() error {
 	}
 }
 
-func (p *PrepearRepo) Stop() error {
+func (p *PrepareRepo) Stop() error {
 	return p.app.Stop(context.Background())
 }
 
 // getExampleIdByTitle Получить id примера по названию.
-func (p *PrepearRepo) getExampleIdByTitle(title string) (*uuid.UUID, error) {
+func (p *PrepareRepo) getExampleIdByTitle(title string) (*uuid.UUID, error) {
 	examples, err := p.app.Examples(context.Background())
 	if err != nil {
 		return nil, err

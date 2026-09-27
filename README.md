@@ -25,5 +25,5 @@ Backend REST API for getting text information for https://skvdmt.ru/
 
 ## Instalation
 ```sh
-git clone https://github.com/skvdmt/skvdmt-back .
+git clone https://github.com/skvdmt/skvdmt-back
 ```

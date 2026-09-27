@@ -1,6 +1,7 @@
 build
-Dockerfile
 logs
+.idea
+Dockerfile
 *.md
 .dockerignore
 .gitignore

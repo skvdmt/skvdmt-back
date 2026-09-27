@@ -21,19 +21,19 @@ const (
 	defaultTimeout        = 10
 	defaultMaxHeaderBytes = 1 << 20 // 1Mb
 	get                   = "GET %s"
-	url_text              = "/text/{id}"
-	url_technologies      = "/technologies"
-	url_examples          = "/examples"
-	url_software          = "/software"
-	url_libs              = "/libs"
-	url_links             = "/links"
-	url_documentation     = "/openapi.yaml"
+	URL_TEXT              = "/text/{id}"
+	URL_TECHNOLOGIES      = "/technologies"
+	URL_EXAMPLES          = "/examples"
+	URL_SOFTWARE          = "/software"
+	URL_LIBS              = "/libs"
+	URL_LINKS             = "/links"
+	URL_DOCUMENTATION     = "/openapi.yaml"
 )
 
 // App Основная структура приложения.
 type App struct {
-	// Канал сигналов операционной системы для отслеживания
-	// сигналов прерывания работы приложения.
+	// Канал сигналов операционной системы для
+	// отслеживания сигналов прерывания.
 	interrupt chan os.Signal
 	// Контекст приложения.
 	ctx context.Context
@@ -53,7 +53,7 @@ type App struct {
 	stopping bool
 	// Корректное завершение горутин.
 	wg *sync.WaitGroup
-	// Листнер готов.
+	// Слушатель готов.
 	listenerReady bool
 }
 
@@ -69,7 +69,8 @@ func NewApp() (*App, error) {
 	model.Logs.Info.Info(fmt.Sprintf("Documentation %s", model.Config.Links.Documentation))
 
 	model.Logs.Info.Info(fmt.Sprintf("%s creating", model.APP_NAME))
-	// Создаем глобальный канал ошибок.
+	// Создаем средства обработки ошибок.
+	model.CreateErrors()
 	model.Errors = make(chan error)
 	// Создание сервера.
 	r := http.NewServeMux()
@@ -142,7 +143,7 @@ func (a *App) Ready() bool {
 
 // HealthCheckLock Метод блокирует выполнение пока
 // сервер не будет готов обрабатывать запросы.
-func (a *App) HelthCheckLock() error {
+func (a *App) HealthCheckLock() error {
 	const interval = time.Millisecond * 10
 	const timeout = time.Second * 3
 	s := time.Now()
@@ -152,7 +153,7 @@ func (a *App) HelthCheckLock() error {
 		}
 		time.Sleep(interval)
 		if time.Since(s) > timeout {
-			return fmt.Errorf("helth check timeout")
+			return fmt.Errorf("health check timeout")
 		}
 	}
 }
@@ -192,7 +193,7 @@ func (a *App) interruptHandler() error {
 	return nil
 }
 
-// stop Остановка приложения.
+// Stop Остановка приложения.
 func (a *App) stop() error {
 	a.stopping = true
 
@@ -213,7 +214,7 @@ func (a *App) stop() error {
 	}
 	model.Logs.Info.Info("http server shutdown")
 
-	// Остановка транспортного слоя из которо по цепочке
+	// Остановка транспортного слоя из которого по цепочке
 	// останавливаются все остальные слои.
 	if err := a.delivery.Stop(a.ctx); err != nil {
 		return err
@@ -227,14 +228,17 @@ func (a *App) stop() error {
 }
 
 // routes Настройка маршрутов.
-func (a *App) routes() error {
-	bu := model.Config.Server.BaseUrl
-	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_text)), a.delivery.Text)
-	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_technologies)), a.delivery.Technologies)
-	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_examples)), a.delivery.Examples)
-	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_software)), a.delivery.Software)
-	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_libs)), a.delivery.Libs)
-	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_links)), a.delivery.Links)
-	a.router.HandleFunc(fmt.Sprintf(get, path.Join(bu, url_documentation)), a.delivery.Documentation)
-	return nil
+func (a *App) routes() {
+	a.route(URL_TEXT, a.delivery.Text)
+	a.route(URL_TECHNOLOGIES, a.delivery.Technologies)
+	a.route(URL_EXAMPLES, a.delivery.Examples)
+	a.route(URL_SOFTWARE, a.delivery.Software)
+	a.route(URL_LIBS, a.delivery.Libs)
+	a.route(URL_LINKS, a.delivery.Libs)
+	a.route(URL_DOCUMENTATION, a.delivery.Documentation)
+}
+
+// route Установка ручки.
+func (a *App) route(u string, h func(http.ResponseWriter, *http.Request)) {
+	a.router.HandleFunc(fmt.Sprintf(get, path.Join(model.Config.Server.BaseUrl, u)), h)
 }

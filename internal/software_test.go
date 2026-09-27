@@ -15,7 +15,7 @@ import (
 	_ "github.com/skvdmt/skvdmt-back/testing_init"
 )
 
-// TestGetSoftware Тестирование получения програмного обеспечения.
+// TestGetSoftware Тестирование получения программного обеспечения.
 func TestGetSoftware(t *testing.T) {
 	p, err := NewPrepareApp()
 	if err != nil {
@@ -58,10 +58,10 @@ func TestGetSoftware(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	expecteds := []string{
+	expects := []string{
 		"GoLand", "WebStorm", "DataGrip", "Bruno", "Swagger", "Vite",
 	}
-	for _, expected := range expecteds {
+	for _, expected := range expects {
 		t.Run(fmt.Sprintf("%s %s", "software", expected), func(t *testing.T) {
 			f := false
 			for _, actual := range actuals {

@@ -32,7 +32,7 @@ func TestExampleTechnologies(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	expecteds := []string{
+	expects := []string{
 		"Go", "Docker", "Git", "Vue",
 	}
 	t.Run(fmt.Sprintf("example %s technologies", title), func(t *testing.T) {
@@ -40,7 +40,7 @@ func TestExampleTechnologies(t *testing.T) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		for _, expected := range expecteds {
+		for _, expected := range expects {
 			f := false
 			for _, actual := range *actuals {
 				if expected == actual.Title {

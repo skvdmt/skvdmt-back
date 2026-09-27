@@ -66,14 +66,14 @@ const (
 func NewApp(ctx context.Context) (*App, error) {
 	model.Logs.Info.Info("repository layer creating")
 	model.Logs.Info.Info("database connection creating")
-	penv := DB_PASSWORD
+	pe := DB_PASSWORD
 	mode, ok := os.LookupEnv(model.MODE)
 	if ok && mode == model.MODE_DEV {
-		penv = POSTGRES_PASSWORD
+		pe = POSTGRES_PASSWORD
 	}
-	pwd, ok := os.LookupEnv(penv)
+	pwd, ok := os.LookupEnv(pe)
 	if !ok {
-		return nil, fmt.Errorf("env %s unset", penv)
+		return nil, fmt.Errorf("env %s unset", pe)
 	}
 	q := fmt.Sprintf(
 		"%s://%s:%s@%s:%d/%s",
@@ -84,17 +84,17 @@ func NewApp(ctx context.Context) (*App, error) {
 		model.Config.Postgres.Port,
 		model.Config.Postgres.Database,
 	)
-	dbpool, err := pgxpool.New(ctx, q)
+	dbp, err := pgxpool.New(ctx, q)
 	if err != nil {
 		return nil, err
 	}
 
 	model.Logs.Info.Info("insert data to database")
 	// Вставка данных в базу данных.
-	inserts.InsertData(dbpool)
+	inserts.InsertData(dbp)
 
 	a := &App{
-		db:              dbpool,
+		db:              dbp,
 		texts:           make(map[string]*entities.Text),
 		updateClose:     make(chan struct{}, 1),
 		update:          &sync.WaitGroup{},
@@ -128,7 +128,7 @@ func (a *App) Ready() bool {
 }
 
 // Stop Остановка.
-func (a *App) Stop(ctx context.Context) error {
+func (a *App) Stop(_ context.Context) error {
 	// Отправляем сигнал завершения обработки обновлений.
 	close(a.updateClose)
 	// Ожидание завершения всех ресурсов.
@@ -141,7 +141,7 @@ func (a *App) Stop(ctx context.Context) error {
 }
 
 // Text Репозиторий текстов.
-func (a *App) Text(ctx context.Context, name string) (*entities.Text, error) {
+func (a *App) Text(_ context.Context, name string) (*entities.Text, error) {
 	a.muTexts.RLock()
 	t, ok := a.texts[name]
 	a.muTexts.RUnlock()
@@ -157,42 +157,42 @@ func (a *App) Text(ctx context.Context, name string) (*entities.Text, error) {
 }
 
 // Technologies Репозиторий технологий.
-func (a *App) Technologies(ctx context.Context) ([]*entities.Technology, error) {
+func (a *App) Technologies(_ context.Context) ([]*entities.Technology, error) {
 	a.muTechnologies.RLock()
 	defer a.muTechnologies.RUnlock()
 	return a.technologies, nil
 }
 
 // Examples Репозиторий примеров.
-func (a *App) Examples(ctx context.Context) ([]*entities.Example, error) {
+func (a *App) Examples(_ context.Context) ([]*entities.Example, error) {
 	a.muExamples.RLock()
 	defer a.muExamples.RUnlock()
 	return a.examples, nil
 }
 
 // Software Репозиторий программ.
-func (a *App) Software(ctx context.Context) ([]*entities.Software, error) {
+func (a *App) Software(_ context.Context) ([]*entities.Software, error) {
 	a.muSoftware.RLock()
 	defer a.muSoftware.RUnlock()
 	return a.software, nil
 }
 
 // Libs Репозиторий библиотек.
-func (a *App) Libs(ctx context.Context) ([]*entities.Lib, error) {
+func (a *App) Libs(_ context.Context) ([]*entities.Lib, error) {
 	a.muLibs.RLock()
 	defer a.muLibs.RUnlock()
 	return a.libs, nil
 }
 
 // Links Репозиторий ссылок.
-func (a *App) Links(ctx context.Context) ([]*entities.Link, error) {
+func (a *App) Links(_ context.Context) ([]*entities.Link, error) {
 	a.muLinks.RLock()
 	defer a.muLinks.RUnlock()
 	return a.links, nil
 }
 
 // Documentation Документация.
-func (a *App) Documentation(ctx context.Context) []byte {
+func (a *App) Documentation(_ context.Context) []byte {
 	a.muDocumentation.RLock()
 	defer a.muDocumentation.RUnlock()
 	return a.documentation
@@ -277,7 +277,7 @@ func (a *App) updateTechnologies(ctx context.Context) {
 		a.update.Done()
 		return
 	}
-	tcs := []*entities.Technology{}
+	var tcs []*entities.Technology
 	for _, cl := range cls {
 		tcs = append(tcs, &entities.Technology{
 			Id:    cl.Id,
@@ -309,7 +309,7 @@ func (a *App) updateExamples(ctx context.Context) {
 		a.update.Done()
 		return
 	}
-	exs := []*entities.Example{}
+	var exs []*entities.Example
 	for _, cl := range cls {
 		lks, err := a.exampleLinks(ctx, cl.Id)
 		if err != nil {
@@ -366,7 +366,7 @@ func (a *App) updateSoftware(ctx context.Context) {
 		a.update.Done()
 		return
 	}
-	sfw := []*entities.Software{}
+	var sfw []*entities.Software
 	for _, cl := range cls {
 		sfw = append(sfw, &entities.Software{
 			Id:    cl.Id,
@@ -398,7 +398,7 @@ func (a *App) updateLibs(ctx context.Context) {
 		a.update.Done()
 		return
 	}
-	lbs := []*entities.Lib{}
+	var lbs []*entities.Lib
 	for _, cl := range cls {
 		lbs = append(lbs, &entities.Lib{
 			Id:  cl.Id,
@@ -411,7 +411,7 @@ func (a *App) updateLibs(ctx context.Context) {
 	a.update.Done()
 }
 
-// updateLinks Основление ссылок.
+// updateLinks Обновление ссылок.
 func (a *App) updateLinks(ctx context.Context) {
 	query := fmt.Sprintf(
 		"select %s, %s, %s from %s order by id",
@@ -429,7 +429,7 @@ func (a *App) updateLinks(ctx context.Context) {
 		a.update.Done()
 		return
 	}
-	lks := []*entities.Link{}
+	var lks []*entities.Link
 	for _, cl := range cls {
 		lks = append(lks, &entities.Link{
 			Id:    cl.Id,
@@ -443,7 +443,7 @@ func (a *App) updateLinks(ctx context.Context) {
 	a.update.Done()
 }
 
-// updateDocumentation Основление документации.
+// updateDocumentation Обновление документации.
 func (a *App) updateDocumentation() {
 	defer a.update.Done()
 	const (

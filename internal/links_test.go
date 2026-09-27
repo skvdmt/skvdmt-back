@@ -58,13 +58,13 @@ func TestGetLinks(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	expecteds := []string{
+	expects := []string{
 		"https://github.com/skvdmt",
 		"https://hub.docker.com/u/skvdmt",
 		"https://t.me/skidanovdima",
 		"mailto:skvdmt@yandex.ru",
 	}
-	for _, expected := range expecteds {
+	for _, expected := range expects {
 		t.Run(fmt.Sprintf("%s %s", "link", expected), func(t *testing.T) {
 			f := false
 			for _, actual := range actuals {

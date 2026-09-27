@@ -10,25 +10,25 @@ var Errors chan error
 // Errs Глобальная переменная с картой описания ошибок.
 var Errs errs
 
-// errs Карта с описание ошибок.
+// Errs Карта с описанием ошибок.
 type errs map[int]error
 
 const (
 	ErrTextNotFound = iota + 1
 	ErrIncorrectTextId
 	ErrDatabase
-	ErrConvertionError
-	ErrConvertionCache
+	ErrConversionError
+	ErrConversionCache
 )
 
-// LoadErrors загрузка описания ошибок.
-func LoadErrors() error {
+// CreateErrors Создание описаний ошибок.
+func CreateErrors() {
+	Logs.Info.Info("Errors map creating")
 	e := make(errs)
 	e[ErrTextNotFound] = fmt.Errorf("text not found")
 	e[ErrIncorrectTextId] = fmt.Errorf("incorrect text id")
 	e[ErrDatabase] = fmt.Errorf("error database")
-	e[ErrConvertionError] = fmt.Errorf("can't conversion error")
-	e[ErrConvertionCache] = fmt.Errorf("can't conversion cache")
+	e[ErrConversionError] = fmt.Errorf("can't conversion error")
+	e[ErrConversionCache] = fmt.Errorf("can't conversion cache")
 	Errs = e
-	return nil
 }

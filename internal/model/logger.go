@@ -20,10 +20,10 @@ const (
 	logPerm     = 0666
 )
 
-// Logs Глобальная переменная инструмента медения журнала.
+// Logs Глобальная переменная инструмента ведения журнала.
 var Logs *Logger
 
-// logger Инструмент ведения журнала.
+// Logger Инструмент ведения журнала.
 type Logger struct {
 	// Журнал информирования.
 	Info *slog.Logger
@@ -41,10 +41,10 @@ func (l *Logger) Close() error {
 	return nil
 }
 
-// Loadlogger Создать логгер и установить ссылку на него
+// CreateLogger Создать логгер и установить ссылку на него
 // в глобальную переменную Logs. В логгере создается зеркало
-// ошибок в os.Stderr и файл журнала.
-func LoadLogger() error {
+// ошибок в Stderr и файл журнала.
+func CreateLogger() error {
 	// Установка директории файлов журнала.
 	logDirectory := logDirectoryProd
 	mode, ok := os.LookupEnv(MODE)
@@ -52,7 +52,7 @@ func LoadLogger() error {
 		logDirectory = logDirectoryDev
 	}
 	n := "models.logger.Loadlogger"
-	// Создать дерикторию журнала для приложения в случае ее отсутствия.
+	// Создать директорию журнала для приложения в случае ее отсутствия.
 	dn := filepath.Join(logDirectory, APP_NAME)
 	if _, err := os.Stat(dn); os.IsNotExist(err) {
 		if err := os.MkdirAll(dn, os.ModePerm); err != nil {
@@ -65,7 +65,7 @@ func LoadLogger() error {
 	if err != nil {
 		return fmt.Errorf("%s %w", n, err)
 	}
-	// Писать журнал ошибок в os.Stderr, а также в файл.
+	// Писать журнал ошибок в Stderr, а также в файл.
 	ew := io.MultiWriter(os.Stderr, ef)
 	// Создать логгер в глобальной переменной Logs.
 	Logs = &Logger{

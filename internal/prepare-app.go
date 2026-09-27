@@ -17,7 +17,7 @@ type PrepareApp struct {
 // NewPrepareApp Конструктор.
 func NewPrepareApp() (*PrepareApp, error) {
 	// Создание логгера.
-	if err := model.LoadLogger(); err != nil {
+	if err := model.CreateLogger(); err != nil {
 		return nil, err
 	}
 	// Создание приложения.
@@ -41,7 +41,7 @@ func (p *PrepareApp) Start() error {
 			os.Exit(1)
 		}
 	}()
-	return p.app.HelthCheckLock()
+	return p.app.HealthCheckLock()
 }
 
 // Stop Остановка.

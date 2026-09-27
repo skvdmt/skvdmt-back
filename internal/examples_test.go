@@ -58,12 +58,12 @@ func TestGetExamples(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	expecteds := []string{
+	expects := []string{
 		"Chess game", "Golang Captcha", "Telegram bot",
 		"Homepage", "Authentication", "Golang JSON Web Tokens",
 		"Golang Chrome driver", "End-to-end test",
 	}
-	for _, expected := range expecteds {
+	for _, expected := range expects {
 		t.Run(fmt.Sprintf("%s %s", "example", expected), func(t *testing.T) {
 			f := false
 			for _, actual := range actuals {

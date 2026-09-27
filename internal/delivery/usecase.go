@@ -24,7 +24,7 @@ type Usecase interface {
 	Software(ctx context.Context) ([]*entities.Software, error)
 	// Сервис библиотек.
 	Libs(ctx context.Context) ([]*entities.Lib, error)
-	// Сервис ссылкок.
+	// Сервис ссылок.
 	Links(ctx context.Context) ([]*entities.Link, error)
 	// Документация.
 	Documentation(ctx context.Context) []byte

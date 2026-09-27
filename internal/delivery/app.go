@@ -3,6 +3,7 @@ package delivery
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -14,7 +15,6 @@ import (
 const (
 	pkg = "delivery"
 	app = "app"
-	swg = "swagger"
 )
 
 // App Транспортный слой.
@@ -101,7 +101,7 @@ func (a *App) Software(w http.ResponseWriter, r *http.Request) {
 	a.sendJSON(w, http.StatusOK, sfw)
 }
 
-// Libs Обработчик запроса бибилиотек.
+// Libs Обработчик запроса библиотек.
 func (a *App) Libs(w http.ResponseWriter, r *http.Request) {
 	lbs, err := a.usecase.Libs(r.Context())
 	if err != nil {
@@ -112,7 +112,7 @@ func (a *App) Libs(w http.ResponseWriter, r *http.Request) {
 	a.sendJSON(w, http.StatusOK, lbs)
 }
 
-// Links Обработчик запроса ссылкок.
+// Links Обработчик запроса ссылок.
 func (a *App) Links(w http.ResponseWriter, r *http.Request) {
 	lks, err := a.usecase.Links(r.Context())
 	if err != nil {
@@ -128,14 +128,14 @@ func (a *App) Documentation(w http.ResponseWriter, r *http.Request) {
 	s := a.usecase.Documentation(r.Context())
 	w.Header().Set("Content-Type", "application/yaml")
 	w.WriteHeader(http.StatusOK)
-	w.Write(s)
+	_, _ = w.Write(s)
 }
 
 // sendJSON Отправка ответа в JSON.
 func (a *App) sendJSON(w http.ResponseWriter, code int, value any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(value)
+	_ = json.NewEncoder(w).Encode(value)
 }
 
 // errorHandle Логирование и отправка ошибок.
@@ -143,12 +143,12 @@ func (a *App) errorHandle(w http.ResponseWriter, err error) {
 	const m = "errorHandle"
 	var e *erw.ErrorWrapper
 	var ok bool
-	if e, ok = err.(*erw.ErrorWrapper); !ok {
+	if ok = errors.As(err, &e); !ok {
 		e = erw.New(erw.Internal(
 			erw.Location(pkg, app, m),
 			erw.Error(fmt.Errorf(
 				"%v; %v dosent match the type *errwrap.ErrorWrapper",
-				model.Errs[model.ErrConvertionError], err),
+				model.Errs[model.ErrConversionError], err),
 			),
 		))
 	}
