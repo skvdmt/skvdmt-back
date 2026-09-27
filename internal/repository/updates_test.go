@@ -12,7 +12,7 @@ import (
 
 // TestUpdates Unit тест проверки обновлений данных.
 func TestUpdates(t *testing.T) {
-	p, err := NewPrepearRepo()
+	p, err := NewPrepareRepo()
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -13,7 +13,7 @@ import (
 
 // TestExampleTechnologies Unit тест получения технологий примера.
 func TestExampleTechnologies(t *testing.T) {
-	p, err := NewPrepearRepo()
+	p, err := NewPrepareRepo()
 	if err != nil {
 		log.Fatal(err)
 	}

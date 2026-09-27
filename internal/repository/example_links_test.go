@@ -13,7 +13,7 @@ import (
 
 // TestExampleLinks Unit тест получения ссылок примера.
 func TestExampleLinks(t *testing.T) {
-	p, err := NewPrepearRepo()
+	p, err := NewPrepareRepo()
 	if err != nil {
 		log.Fatal(err)
 	}

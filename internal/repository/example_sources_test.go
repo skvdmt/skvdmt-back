@@ -13,7 +13,7 @@ import (
 
 // TestExampleSources Unit тест получения исходников примера.
 func TestExampleSources(t *testing.T) {
-	p, err := NewPrepearRepo()
+	p, err := NewPrepareRepo()
 	if err != nil {
 		log.Fatal(err)
 	}
