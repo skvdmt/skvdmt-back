@@ -234,7 +234,7 @@ func (a *App) routes() {
 	a.route(URL_EXAMPLES, a.delivery.Examples)
 	a.route(URL_SOFTWARE, a.delivery.Software)
 	a.route(URL_LIBS, a.delivery.Libs)
-	a.route(URL_LINKS, a.delivery.Libs)
+	a.route(URL_LINKS, a.delivery.Links)
 	a.route(URL_DOCUMENTATION, a.delivery.Documentation)
 }
 
