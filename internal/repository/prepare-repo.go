@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"os"
 	"sync"
 	"time"
 
@@ -30,6 +31,14 @@ func NewPrepareRepo() (*PrepareRepo, error) {
 	}
 	// Создаем глобальный канал ошибок.
 	model.Errors = make(chan error)
+	go func() {
+		for {
+			err := <-model.Errors
+			model.Logs.Error.Error(err.Error())
+			_ = model.Logs.Close()
+			os.Exit(1)
+		}
+	}()
 	r, err := NewApp(context.Background())
 	if err != nil {
 		return nil, err
