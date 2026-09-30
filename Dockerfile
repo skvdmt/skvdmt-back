@@ -15,10 +15,10 @@ RUN go mod download
 # Тестирование.
 FROM preper AS testing
 RUN --mount=type=bind,target=. \
---mount=type=secret,id=DB_PASSWORD,env=DB_PASSWORD
-RUN go test --tags=unit -v ./...
-RUN go test --tags=integration -v ./...
-RUN go test --tags=e2e -v ./...
+  --mount=type=secret,id=DB_PASSWORD,env=DB_PASSWORD \
+  go test --tags=unit -v ./... \
+  go test --tags=integration -v ./... \
+  go test --tags=e2e -v ./...
 
 # Сборка.
 FROM preper AS building
