@@ -16,7 +16,7 @@ RUN go mod download
 FROM preper AS testing
 RUN --mount=type=secret,id=DB_PASSWORD \
   export DB_PASSWORD=$(cat /run/secrets/DB_PASSWORD) && \
-  echo $DB_PASSWORD
+  go test --tags=unit -v ./...
 
   # RUN --mount=type=bind,target=.
 # RUN --mount=type=secret,id=DB_PASSWORD,env=DB_PASSWORD
