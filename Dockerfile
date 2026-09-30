@@ -15,8 +15,7 @@ RUN go mod download
 # Тестирование.
 FROM preper AS testing
 
-RUN --mount=type=bind,target=. \
-  --mount=type=secret,id=SECRET_TOKEN,env=SECRET_TOKEN \
+RUN --mount=type=secret,id=SECRET_TOKEN,env=SECRET_TOKEN \
   go test --tags=unit -v ./...
 
 # RUN --mount=type=secret,id=DB_PASSWORD \
