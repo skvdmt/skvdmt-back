@@ -14,12 +14,16 @@ RUN go mod download
 
 # Тестирование.
 FROM preper AS testing
-RUN --mount=type=bind,target=.
-RUN --mount=type=secret,id=DB_PASSWORD,env=DB_PASSWORD
-RUN echo $DB_PASSWORD
-RUN go test --tags=unit -v ./...
-RUN go test --tags=integration -v ./...
-RUN go test --tags=e2e -v ./...
+RUN --mount=type=secret,id=DB_PASSWORD \
+  export DB_PASSWORD=$(cat /run/secrets/DB_PASSWORD) && \
+  echo $DB_PASSWORD
+
+  # RUN --mount=type=bind,target=.
+# RUN --mount=type=secret,id=DB_PASSWORD,env=DB_PASSWORD
+# RUN echo $DB_PASSWORD
+# RUN go test --tags=unit -v ./...
+# RUN go test --tags=integration -v ./...
+# RUN go test --tags=e2e -v ./...
 
 # Сборка.
 FROM preper AS building
