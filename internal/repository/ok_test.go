@@ -12,13 +12,13 @@ import (
 // TestOK Unit2 тест OK.
 func TestOK(t *testing.T) {
 	t.Run("ok test", func(t *testing.T) {
-		_, err := NewPrepareRepo()
+		p, err := NewPrepareRepo()
 		if err != nil {
 			log.Fatal(err)
 		}
-		// if err := p.Start(); err != nil {
-		// 	log.Fatal(err)
-		// }
+		if err := p.Start(); err != nil {
+			log.Fatal(err)
+		}
 		// defer func() {
 		// 	if err := p.Stop(); err != nil {
 		// 		log.Fatal(err)
