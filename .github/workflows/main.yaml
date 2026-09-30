@@ -16,13 +16,15 @@ jobs:
       - name: Cloning sources.
         run: |
           ssh -i ~/.ssh/github_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} <<EOF
+            set -e
             cd ~/src
-            rm -rf ${{ github.repository }}
+            rm -rf ${{ github.event.repository.name }}
             git clone ssh://git@github.com/${{ github.repository }}.git
           EOF
       - name: Migrate up.
         run: |
           ssh -i ~/.ssh/github_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} <<EOF
+            set -e
             cd ~/src/${{ github.event.repository.name }}
             docker run --rm \
               --network=${{ secrets.DOCKER_NETWORK }} \
