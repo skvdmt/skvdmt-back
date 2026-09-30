@@ -226,7 +226,7 @@ func (a *App) updateAll(ctx context.Context) {
 	go a.updateLibs(ctx)
 	go a.updateLinks(ctx)
 	go a.updateDocumentation()
-	a.update.Wait()
+	//a.update.Wait()
 	a.allUpdated = true
 	model.Logs.Info.Info("all updated")
 }
