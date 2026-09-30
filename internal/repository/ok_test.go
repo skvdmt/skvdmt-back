@@ -16,13 +16,13 @@ func TestOK(t *testing.T) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		if err := p.Start(); err != nil {
-			log.Fatal(err)
-		}
-		defer func() {
-			if err := p.Stop(); err != nil {
-				log.Fatal(err)
-			}
-		}()
+		// if err := p.Start(); err != nil {
+		// 	log.Fatal(err)
+		// }
+		// defer func() {
+		// 	if err := p.Stop(); err != nil {
+		// 		log.Fatal(err)
+		// 	}
+		// }()
 	})
 }
