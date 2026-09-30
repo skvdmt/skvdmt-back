@@ -40,7 +40,7 @@ jobs:
           ssh -i ~/.ssh/github_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} <<EOF
             set -e
             cd ~/src/${{ github.event.repository.name }}
-            export DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD_URL_ENCODE }}
+            export DB_PASSWORD=foo
             docker buildx create --use \
               --name ${{ secrets.DOCKER_NETWORK }}-builder \
               --driver docker-container \
