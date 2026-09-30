@@ -50,7 +50,7 @@ jobs:
               --target=testing \
               --output=type=docker \
               --build-arg NAME=${{ github.event.repository.name }} \
-              --secret type=env,id=SECRET_TOKEN,src=SECRET_TOKEN \
+              --secret id=secret_token,env=SECRET_TOKEN \
               --no-cache \
               --tag ${{ github.repository }}:testing .
           EOF
