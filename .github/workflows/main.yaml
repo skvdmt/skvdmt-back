@@ -52,7 +52,7 @@ jobs:
               --output=type=docker \
               --build-arg NAME=${{ github.event.repository.name }} \
               --secret id=DB_PASSWORD,env=DB_PASSWORD \
-              --secret id=SECRET_TOKEN \
+              --secret id=SECRET_TOKEN,env=SECRET_TOKEN \
               --no-cache \
               --tag ${{ github.repository }}:testing .
           EOF
