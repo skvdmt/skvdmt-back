@@ -12,7 +12,7 @@ import (
 // TestOK Unit2 тест OK.
 func TestOK(t *testing.T) {
 	t.Run("ok test", func(t *testing.T) {
-		p, err := NewPrepareRepo()
+		_, err := NewPrepareRepo()
 		if err != nil {
 			log.Fatal(err)
 		}
