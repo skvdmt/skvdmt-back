@@ -16,6 +16,7 @@ RUN go mod download
 FROM preper AS testing
 RUN --mount=type=bind,target=. \
   --mount=type=secret,id=DB_PASSWORD,env=DB_PASSWORD \
+  echo $DB_PASSWORD \
   go test --tags=unit -v ./... \
   go test --tags=integration -v ./... \
   go test --tags=e2e -v ./...

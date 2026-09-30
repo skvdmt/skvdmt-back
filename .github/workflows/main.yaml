@@ -44,7 +44,7 @@ jobs:
               --name ${{ secrets.DOCKER_NETWORK }}-builder \
               --driver docker-container \
               --driver-opt "network=${{ secrets.DOCKER_NETWORK }}"
-            DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD_URL_ENCODE }}
+            DB_PASSWORD=foo
             docker buildx build \
               --network=host \
               --target=testing \
