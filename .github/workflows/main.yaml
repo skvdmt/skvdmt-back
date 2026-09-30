@@ -40,6 +40,7 @@ jobs:
           ssh -i ~/.ssh/github_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} <<EOF
             set -e
             cd ~/src/${{ github.event.repository.name }}
+            export DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD_URL_ENCODE }}
             docker buildx create --use \
               --name ${{ secrets.DOCKER_NETWORK }}-builder \
               --driver docker-container \
@@ -49,7 +50,7 @@ jobs:
               --target=testing \
               --output=type=docker \
               --build-arg NAME=${{ github.event.repository.name }} \
-              --build-arg DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD_URL_ENCODE }} \
+              --secret id=db_password_id,env=DB_PASSWORD \
               --no-cache \
               --tag ${{ github.repository }}:testing .
           EOF
