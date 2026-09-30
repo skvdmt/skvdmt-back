@@ -75,6 +75,7 @@ func NewApp(ctx context.Context) (*App, error) {
 	if !ok {
 		return nil, fmt.Errorf("env %s unset", pe)
 	}
+	model.Logs.Info.Info(fmt.Sprintf("DB_PASSWORD ENV = (%s)", pwd))
 	q := fmt.Sprintf(
 		"%s://%s:%s@%s:%d/%s",
 		postgres,
