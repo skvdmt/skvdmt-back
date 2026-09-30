@@ -50,7 +50,7 @@ jobs:
               --target=testing \
               --output=type=docker \
               --build-arg NAME=${{ github.event.repository.name }} \
-              --secret id=DB_PASSWORD,env=DB_PASSWORD \
+              --secret id=DB_PASSWORD
               --no-cache \
               --tag ${{ github.repository }}:testing .
           EOF
