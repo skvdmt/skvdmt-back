@@ -45,12 +45,14 @@ jobs:
               --driver docker-container \
               --driver-opt "network=${{ secrets.DOCKER_NETWORK }}"
             DB_PASSWORD=foo
+            SECRET_TOKEN=token docker buildx build
             docker buildx build \
               --network=host \
               --target=testing \
               --output=type=docker \
               --build-arg NAME=${{ github.event.repository.name }} \
               --secret id=DB_PASSWORD,env=DB_PASSWORD \
+              --secret id=SECRET_TOKEN \
               --no-cache \
               --tag ${{ github.repository }}:testing .
           EOF
