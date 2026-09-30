@@ -5,9 +5,11 @@ WORKDIR /usr/src/${NAME}
 # Создание директорий.
 RUN mkdir /etc/${NAME}
 RUN mkdir /var/log/${NAME}
+RUN mkdir /usr/local/share/doc
 # Копирование файлов.
 COPY . .
 COPY ./config/prod.yaml /etc/${NAME}/prod.yaml
+COPY ./openapi.yaml /usr/local/share/doc/openapi.yaml
 RUN go mod download
 
 # Тестирование.
