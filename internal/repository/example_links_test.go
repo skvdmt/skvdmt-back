@@ -1,4 +1,4 @@
-//go:build unit2
+//go:build unit
 
 package repository
 
