@@ -14,10 +14,11 @@ RUN go mod download
 
 # Тестирование.
 FROM preper AS testing
-
-RUN --mount=type=secret,id=secret_token \
-  export SECRET_TOKEN=$(cat /run/secrets/secret_token) && \
-  go test --tags=unit -v ./...
+RUN --mount=type=secret,id=db_password \
+  export DB_PASSWORD=$(cat /run/secrets/db_password) && \
+  go test --tags=unit -v ./... && \
+  go test --tags=integration -v ./... && \
+  go test --tags=e2e -v ./...
 
 # RUN --mount=type=secret,id=SECRET_TOKEN,env=SECRET_TOKEN \
 #   go test --tags=unit -v ./...

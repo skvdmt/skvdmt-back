@@ -71,16 +71,10 @@ func NewApp(ctx context.Context) (*App, error) {
 	if ok && mode == model.MODE_DEV {
 		pe = POSTGRES_PASSWORD
 	}
-	t, ok := os.LookupEnv("SECRET_TOKEN")
-	if !ok {
-		return nil, fmt.Errorf("env %s unset", "SECRET_TOKEN")
-	}
-	model.Logs.Info.Info(fmt.Sprintf("SECRET_TOKEN ENV = (%s)", t))
 	pwd, ok := os.LookupEnv(pe)
 	if !ok {
 		return nil, fmt.Errorf("env %s unset", pe)
 	}
-	model.Logs.Info.Info(fmt.Sprintf("DB_PASSWORD ENV = (%s)", pwd))
 	q := fmt.Sprintf(
 		"%s://%s:%s@%s:%d/%s",
 		postgres,
