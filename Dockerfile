@@ -14,7 +14,6 @@ RUN go mod download
 
 # Тестирование.
 FROM preper AS testing
-
 RUN --mount=type=secret,id=db_password \
   export DB_PASSWORD=$(cat /run/secrets/db_password) && \
   go test --tags=unit -v ./... && \
