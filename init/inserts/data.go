@@ -259,6 +259,18 @@ var technologies = []request{
 		query: `INSERT INTO technologies (title, url) VALUES($1, $2) RETURNING id;`,
 		args:  []any{"Vue", "https://vuejs.org/"},
 	},
+	{
+		query: `INSERT INTO technologies (title, url) VALUES($1, $2) RETURNING id;`,
+		args:  []any{"Nuxt", "https://nuxt.com/"},
+	},
+	{
+		query: `INSERT INTO technologies (title, url) VALUES($1, $2) RETURNING id;`,
+		args:  []any{"Apache Kafka", "https://kafka.apache.org/"},
+	},
+	{
+		query: `INSERT INTO technologies (title, url) VALUES($1, $2) RETURNING id;`,
+		args:  []any{"Redis", "https://redis.io/"},
+	},
 }
 
 var sources = []request{
