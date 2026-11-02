@@ -25,6 +25,10 @@ var requests = []request{
 	},
 	{
 		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
+		args:  []any{"runm", "Дмитрий Скиданов"},
+	},
+	{
+		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
 		args:  []any{"tech", "Main technologies"},
 	},
 	{
