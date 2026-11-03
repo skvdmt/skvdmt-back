@@ -7,6 +7,7 @@ type ErrorWrapper struct {
 	code     int
 	message  any
 	internal error
+	log      bool
 }
 
 // New constructor ErrorWrapper
@@ -14,6 +15,7 @@ func New(options ...Option) *ErrorWrapper {
 	e := &ErrorWrapper{
 		code:    defaultCode,
 		message: defaultMessage,
+		log:     defaultLog,
 	}
 	// options processing
 	for _, o := range options {
@@ -54,4 +56,9 @@ func (e *ErrorWrapper) Detailed() error {
 		return fmt.Errorf("internal=%w", e.Internal())
 	}
 	return fmt.Errorf("%s, internal=%w", e.Error(), e.Internal())
+}
+
+// Log write error to journal.
+func (e *ErrorWrapper) Log() bool {
+	return e.log
 }

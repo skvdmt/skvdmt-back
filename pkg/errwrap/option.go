@@ -59,3 +59,10 @@ func Internal(options ...InternalOption) Option {
 		e.internal = fmt.Errorf("%s", strings.Join(internal.messages, "; "))
 	}
 }
+
+// Log Устновка флага записи ошибки в журнал.
+func Log(value bool) Option {
+	return func(e *ErrorWrapper) {
+		e.log = value
+	}
+}
