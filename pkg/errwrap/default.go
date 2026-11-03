@@ -4,13 +4,6 @@ import "net/http"
 
 var defaultCode int = -1
 var defaultMessage any
-var defaultLog = true
-
-// SetDefaultLog Установка значения по-умолчанию
-// для параметра разрешающего запись в журнал.
-func SetDefaultLog(value bool) {
-	defaultLog = value
-}
 
 // CodeHTTPDefault устанавливает HTTP код статуса по-умолчанию для всех
 // экземпляров оберток ошибок ErrorWrapper. Также изменяет message
