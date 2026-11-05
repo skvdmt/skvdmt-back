@@ -49,7 +49,15 @@ var requests = []request{
 	},
 	{
 		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
-		args:  []any{"prof", "Full stack engineer. Apps for high load."},
+		args:  []any{"prof", "Full stack engineer."},
+	},
+	{
+		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
+		args:  []any{"dist", "Distributed Systems."},
+	},
+	{
+		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
+		args:  []any{"high", "Apps for high load."},
 	},
 	{
 		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
