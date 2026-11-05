@@ -61,7 +61,7 @@ func TestGetTexts(t *testing.T) {
 		},
 		{
 			name:     "prof",
-			expected: "Full stack engineer. Apps for high load.",
+			expected: "Full stack engineer.",
 		},
 		{
 			name:     "abou",
