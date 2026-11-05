@@ -99,6 +99,7 @@ jobs:
               --network ${{ secrets.DOCKER_NETWORK }} \
               --name ${{ github.event.repository.name }}-v${{ vars.MAJOR_VERSION }} \
               --memory="32m" \
+              --cpus="0.25" \
               --env DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD_URL_ENCODE }} \
               --volume ${{ secrets.HOME }}/logs/${{ github.event.repository.name }}:/var/log/${{ github.event.repository.name }} \
               --restart unless-stopped \
@@ -116,6 +117,7 @@ jobs:
               --network ${{ secrets.DOCKER_NETWORK }} \
               --restart unless-stopped \
               --memory="48m" \
+              --cpus="0.25" \
               --env SWAGGER_JSON_URL=https://skvdmt.ru/api/v1/openapi.yaml \
               docker.swagger.io/swaggerapi/swagger-ui
           EOF
