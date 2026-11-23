@@ -101,6 +101,7 @@ jobs:
               --memory="32m" \
               --cpus="0.25" \
               --env DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD_URL_ENCODE }} \
+              --ip ${{ vars.CONTAINER_IP }} \
               --volume ${{ secrets.HOME }}/logs/${{ github.event.repository.name }}:/var/log/${{ github.event.repository.name }} \
               --restart unless-stopped \
               --stop-timeout -1 \
@@ -118,6 +119,7 @@ jobs:
               --restart unless-stopped \
               --memory="48m" \
               --cpus="0.25" \
+              --ip ${{ vars.DOCUMENTATION_CONTAINER_IP }} \
               --env SWAGGER_JSON_URL=https://skvdmt.ru/api/v1/openapi.yaml \
               docker.swagger.io/swaggerapi/swagger-ui
           EOF

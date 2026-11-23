@@ -67,6 +67,10 @@ var requests = []request{
 		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
 		args:  []any{"loca", "Russian Federation, Moscow"},
 	},
+	{
+		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
+		args:  []any{"slog", "I'm allergic to else, buffered channels, recover, and generics."},
+	},
 
 	// software
 	{
