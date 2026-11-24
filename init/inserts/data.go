@@ -71,6 +71,14 @@ var requests = []request{
 		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
 		args:  []any{"slog", "I'm allergic to else, buffered channels, recover, and generics."},
 	},
+	{
+		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
+		args:  []any{"stat", "Real-time server docker stats dashboard"},
+	},
+	{
+		query: `INSERT INTO texts (name, text) VALUES ($1, $2);`,
+		args:  []any{"home", "Home sweet home"},
+	},
 
 	// software
 	{
@@ -174,7 +182,7 @@ One user can leave no more than one message per 24 hours.`,
 			"home",
 			"Homepage",
 			`I am Dmitry Skidanov, a full-stack engineer. This is my personal webpage.
-Here, you can explore the technology stack I use for application development, view examples of my work, and check out the source code.`,
+Here, you can explore the technology stack I use for application development, view examples of my work, and check out the source code, and see real-time performance statistics for my applications.`,
 		},
 	},
 	{
@@ -346,6 +354,10 @@ var sources = []request{
 		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
 		args:  []any{"https://github.com/skvdmt/captcha"},
 	},
+	{
+		query: `INSERT INTO sources(url) VALUES($1) RETURNING id;`,
+		args:  []any{"https://github.com/skvdmt/skvdmt-docker-stats"},
+	},
 }
 
 const duplicate = "duplicate key value violates unique constraint"
@@ -407,6 +419,7 @@ func InsertData(db *pgxpool.Pool) {
 	createLinks(db, "examples_sources", "source_id", 3, 4)
 	createLinks(db, "examples_sources", "source_id", 4, 5)
 	createLinks(db, "examples_sources", "source_id", 4, 6)
+	createLinks(db, "examples_sources", "source_id", 4, 15)
 	createLinks(db, "examples_sources", "source_id", 5, 7)
 	createLinks(db, "examples_sources", "source_id", 5, 8)
 	createLinks(db, "examples_sources", "source_id", 5, 9)
